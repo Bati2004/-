@@ -284,75 +284,25 @@
         }
 
         @media (max-width: 768px) {
-            #header {
-                padding: 8px 14px;
-                gap: 8px;
-            }
-            #header h1 {
-                font-size: 16px;
-            }
-            #header h1 span {
-                font-size: 12px;
-            }
-            #searchInput {
-                font-size: 13px;
-                min-width: 80px;
-                padding: 6px 12px;
-            }
-            #familyFilter {
-                font-size: 13px;
-                max-width: 110px;
-                padding: 6px 12px;
-            }
-            .header-btn {
-                font-size: 12px;
-                padding: 6px 12px;
-            }
-            #stats {
-                font-size: 12px;
-            }
-            #login-box {
-                padding: 32px 24px;
-                min-width: unset;
-                width: 92vw;
-            }
-            #login-box h2 {
-                font-size: 22px;
-            }
-            #tooltip {
-                min-width: 160px;
-                padding: 12px 16px;
-            }
-            #tooltip .name {
-                font-size: 16px;
-            }
+            #header { padding: 8px 14px; gap: 8px; }
+            #header h1 { font-size: 16px; }
+            #header h1 span { font-size: 12px; }
+            #searchInput { font-size: 13px; min-width: 80px; padding: 6px 12px; }
+            #familyFilter { font-size: 13px; max-width: 110px; padding: 6px 12px; }
+            .header-btn { font-size: 12px; padding: 6px 12px; }
+            #stats { font-size: 12px; }
+            #login-box { padding: 32px 24px; min-width: unset; width: 92vw; }
+            #login-box h2 { font-size: 22px; }
+            #tooltip { min-width: 160px; padding: 12px 16px; }
+            #tooltip .name { font-size: 16px; }
         }
         @media (max-width: 420px) {
-            #header {
-                padding: 4px 8px;
-                gap: 4px;
-            }
-            #header h1 {
-                font-size: 13px;
-                margin-right: 4px;
-            }
-            #searchInput {
-                font-size: 11px;
-                min-width: 50px;
-                padding: 4px 8px;
-            }
-            #familyFilter {
-                font-size: 11px;
-                max-width: 70px;
-                padding: 4px 8px;
-            }
-            .header-btn {
-                font-size: 10px;
-                padding: 4px 8px;
-            }
-            #stats {
-                font-size: 10px;
-            }
+            #header { padding: 4px 8px; gap: 4px; }
+            #header h1 { font-size: 13px; margin-right: 4px; }
+            #searchInput { font-size: 11px; min-width: 50px; padding: 4px 8px; }
+            #familyFilter { font-size: 11px; max-width: 70px; padding: 4px 8px; }
+            .header-btn { font-size: 10px; padding: 4px 8px; }
+            #stats { font-size: 10px; }
         }
     </style>
 </head>
@@ -371,9 +321,9 @@
 
     <div id="header">
         <h1>Хьачарой <span>· тейп</span></h1>
-        <input type="text" id="searchInput" placeholder="Поиск по имени..." oninput="searchByName(this.value)">
+        <input type="text" id="searchInput" placeholder="🔍 Поиск по имени или фамилии..." oninput="searchByName(this.value)">
         <select id="familyFilter" onchange="filterByFamily(this.value)">
-            <option value="">Все семьи</option>
+            <option value="">Все семьи (гары)</option>
         </select>
         <button class="header-btn" onclick="resetView()">Сброс</button>
         <span id="stats">0</span>
@@ -392,17 +342,17 @@
 
     <script>
         // ============================================================
-        // 1. ДАННЫЕ
+        // 1. ДАННЫЕ — фамилия может быть пустой!
         // ============================================================
         let people = [
-            { id: 'root1', name: 'Корень', family: 'Ведчарой', fatherId: null }
+            { id: 'root1', name: 'Корень', family: '', fatherId: null }
         ];
 
-        const familyColors = {
-            'Ведчарой': '#2563eb',
-        };
+        // Цвета для семей (если фамилия есть)
+        const familyColors = {};
 
         function getFamilyColor(family) {
+            if (!family) return '#6b7a8f'; // серый для безымянных
             if (familyColors[family]) return familyColors[family];
             const palette = ['#2563eb', '#7c3aed', '#0891b2', '#059669', '#d97706', '#dc2626', '#4f46e5', '#0d9488'];
             const idx = Object.keys(familyColors).length % palette.length;
@@ -416,19 +366,14 @@
         let highlightIds = new Set();
         let dimFamily = null;
         let scale = 1;
-        let offsetX = 0,
-            offsetY = 0;
+        let offsetX = 0, offsetY = 0;
         let isDragging = false;
-        let dragStartX = 0,
-            dragStartY = 0;
-        let dragStartOffX = 0,
-            dragStartOffY = 0;
+        let dragStartX = 0, dragStartY = 0;
+        let dragStartOffX = 0, dragStartOffY = 0;
         let canvas, ctx;
         let nodePositions = new Map();
-        const NODE_W = 150,
-            NODE_H = 60;
-        const LVL_GAP = 60,
-            NODE_GAP = 18;
+        const NODE_W = 150, NODE_H = 60;
+        const LVL_GAP = 60, NODE_GAP = 18;
 
         let editMode = false;
 
@@ -439,10 +384,8 @@
             canvas = document.getElementById('treeCanvas');
             ctx = canvas.getContext('2d');
             resizeCanvas();
-            window.addEventListener('resize', () => { resizeCanvas();
-                render(); });
-            window.addEventListener('orientationchange', () => { setTimeout(() => { resizeCanvas();
-                    render(); }, 300); });
+            window.addEventListener('resize', () => { resizeCanvas(); render(); });
+            window.addEventListener('orientationchange', () => { setTimeout(() => { resizeCanvas(); render(); }, 300); });
 
             canvas.addEventListener('mousedown', onPointerDown);
             canvas.addEventListener('mousemove', onPointerMove);
@@ -480,10 +423,7 @@
         function centerView() {
             const posMap = computeLayout();
             if (posMap.size === 0) return;
-            let minX = Infinity,
-                maxX = -Infinity,
-                minY = Infinity,
-                maxY = -Infinity;
+            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
             posMap.forEach(pos => {
                 if (pos.x < minX) minX = pos.x;
                 if (pos.x > maxX) maxX = pos.x;
@@ -552,10 +492,7 @@
             nodePositions = posMap;
             if (posMap.size === 0) return;
 
-            let minX = Infinity,
-                maxX = -Infinity,
-                minY = Infinity,
-                maxY = -Infinity;
+            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
             posMap.forEach(pos => {
                 if (pos.x < minX) minX = pos.x;
                 if (pos.x > maxX) maxX = pos.x;
@@ -616,17 +553,25 @@
                 ctx.shadowBlur = 0;
                 ctx.shadowOffsetY = 0;
 
-                // Имя
+                // ============================================
+                // ИМЯ (крупно)
+                // ============================================
                 ctx.fillStyle = '#1a1a2e';
                 ctx.font = '600 16px Inter, sans-serif';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText(p.name, x + NODE_W / 2, y + NODE_H / 2 - 6);
 
-                // Семья
-                ctx.fillStyle = '#6b7a8f';
-                ctx.font = '11px Inter, sans-serif';
-                ctx.fillText(p.family, x + NODE_W / 2, y + NODE_H / 2 + 16);
+                // Если есть фамилия — имя чуть выше
+                if (p.family && p.family !== '') {
+                    ctx.fillText(p.name, x + NODE_W / 2, y + NODE_H / 2 - 6);
+                    // Фамилия (мелко снизу)
+                    ctx.fillStyle = '#2563eb';
+                    ctx.font = '11px Inter, sans-serif';
+                    ctx.fillText(p.family, x + NODE_W / 2, y + NODE_H / 2 + 16);
+                } else {
+                    // Если фамилии нет — имя по центру
+                    ctx.fillText(p.name, x + NODE_W / 2, y + NODE_H / 2);
+                }
 
                 // ============================================
                 // ✏️ и ➕ (только в админ-режиме)
@@ -668,7 +613,7 @@
         }
 
         // ============================================================
-        // 5. УПРАВЛЕНИЕ (МЫШЬ + ТАЧ)
+        // 5. УПРАВЛЕНИЕ
         // ============================================================
         function getCanvasCoords(e) {
             const rect = canvas.getBoundingClientRect();
@@ -705,10 +650,8 @@
             canvas.style.cursor = 'grab';
         }
 
-        let touchStartX = 0,
-            touchStartY = 0;
-        let touchStartOffX = 0,
-            touchStartOffY = 0;
+        let touchStartX = 0, touchStartY = 0;
+        let touchStartOffX = 0, touchStartOffY = 0;
         let lastTouchDist = 0;
         let isTouchDragging = false;
 
@@ -773,7 +716,7 @@
         }
 
         // ============================================================
-        // 6. КЛИК ПО КАРТОЧКЕ — ОБРАБОТКА ✏️ И ➕
+        // 6. КЛИК — обработка ✏️ и ➕
         // ============================================================
         function onClick(e) {
             const rect = canvas.getBoundingClientRect();
@@ -786,10 +729,7 @@
             const posMap = nodePositions;
             if (posMap.size === 0) return;
 
-            let minX = Infinity,
-                maxX = -Infinity,
-                minY = Infinity,
-                maxY = -Infinity;
+            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
             posMap.forEach(pos => {
                 if (pos.x < minX) minX = pos.x;
                 if (pos.x > maxX) maxX = pos.x;
@@ -833,15 +773,16 @@
                 const localX = (tx - pos.x) / NODE_W;
                 const localY = (ty - pos.y) / NODE_H;
 
-                // ➕ Плюсик внизу по центру (localX 0.35-0.65, localY 0.8-1.0)
+                // ➕ Плюсик внизу по центру — добавить сына
                 if (localY > 0.75 && localX > 0.3 && localX < 0.7) {
                     const newName = prompt('➕ Добавить сына для "' + p.name + '"\n\nВведите имя:');
                     if (newName && newName.trim() !== '') {
                         const newId = 'p' + Date.now() + Math.random().toString(36).slice(2, 6);
+                        // Сын НЕ наследует фамилию — оставляем пустую
                         const newPerson = {
                             id: newId,
                             name: newName.trim(),
-                            family: p.family,
+                            family: '', // пустая фамилия
                             fatherId: p.id
                         };
                         people.push(newPerson);
@@ -855,78 +796,26 @@
                     return;
                 }
 
-                // ✏️ Карандаш в правом верхнем углу (localX 0.8-1.0, localY 0.0-0.25)
+                // ✏️ Карандаш в правом верхнем углу — редактировать имя и фамилию
                 if (localX > 0.78 && localY < 0.25) {
-                    // Создаём поле ввода прямо на карточке
-                    const input = document.createElement('input');
-                    input.type = 'text';
-                    input.value = p.name;
-                    input.style.position = 'fixed';
-                    input.style.left = (e.clientX - 70) + 'px';
-                    input.style.top = (e.clientY - 20) + 'px';
-                    input.style.width = '140px';
-                    input.style.padding = '10px 14px';
-                    input.style.border = '2px solid #2563eb';
-                    input.style.borderRadius = '10px';
-                    input.style.background = '#ffffff';
-                    input.style.color = '#1a1a2e';
-                    input.style.fontFamily = 'Inter, sans-serif';
-                    input.style.fontSize = '16px';
-                    input.style.fontWeight = '600';
-                    input.style.outline = 'none';
-                    input.style.boxShadow = '0 8px 30px rgba(0,0,0,0.15)';
-                    input.style.zIndex = '300';
-                    input.autofocus = true;
-                    input.select();
-
-                    document.body.appendChild(input);
-
-                    const saveEdit = () => {
-                        const val = input.value.trim();
-                        if (val && val !== '') {
-                            p.name = val;
-                            saveToStorage();
-                            buildFamilyFilter();
-                            updateStats();
-                            render();
-                            alert('✅ Имя обновлено на "' + val + '"');
-                        } else {
-                            render();
-                        }
-                        if (document.body.contains(input)) {
-                            document.body.removeChild(input);
-                        }
-                    };
-
-                    input.addEventListener('blur', saveEdit);
-
-                    input.addEventListener('keydown', (ev) => {
-                        if (ev.key === 'Enter') {
-                            saveEdit();
-                        }
-                        if (ev.key === 'Escape') {
-                            if (document.body.contains(input)) {
-                                document.body.removeChild(input);
-                            }
-                            render();
-                        }
-                    });
-
-                    // Закрываем по клику вне
-                    setTimeout(() => {
-                        const closeHandler = (ev2) => {
-                            if (ev2.target !== input) {
-                                saveEdit();
-                                document.removeEventListener('click', closeHandler);
-                            }
-                        };
-                        document.addEventListener('click', closeHandler);
-                    }, 100);
-
+                    const currentFamily = p.family || '(нет фамилии)';
+                    const newName = prompt('✏️ Редактирование\n\nИмя:', p.name);
+                    if (newName !== null && newName.trim() !== '') {
+                        p.name = newName.trim();
+                    }
+                    const newFamily = prompt('✏️ Фамилия (семья)\n\nЕсли фамилии нет — оставь пустым:', p.family);
+                    if (newFamily !== null) {
+                        p.family = newFamily.trim();
+                    }
+                    saveToStorage();
+                    buildFamilyFilter();
+                    updateStats();
+                    render();
+                    alert('✅ Обновлено!');
                     return;
                 }
 
-                // Если кликнули по телу карточки (не по кнопкам) — тултип
+                // Если кликнули по телу карточки — тултип
                 showTooltip(e.clientX, e.clientY, p);
                 highlightIds.clear();
                 let cur = p;
@@ -961,12 +850,12 @@
         function showTooltip(clientX, clientY, p) {
             const tip = document.getElementById('tooltip');
             document.getElementById('tipName').textContent = p.name;
-            document.getElementById('tipFamily').textContent = p.family;
+            document.getElementById('tipFamily').textContent = p.family || '(без семьи)';
 
             let chain = [];
             let cur = p;
             while (cur) {
-                chain.push(cur.name);
+                chain.push(cur.name + (cur.family ? ' (' + cur.family + ')' : ''));
                 const father = people.find(pp => pp.id === cur.fatherId);
                 cur = father;
             }
@@ -996,7 +885,9 @@
             if (!query.trim()) { render(); return; }
             const q = query.trim().toLowerCase();
             people.forEach(p => {
-                if (p.name.toLowerCase().includes(q)) {
+                const matchName = p.name.toLowerCase().includes(q);
+                const matchFamily = p.family && p.family.toLowerCase().includes(q);
+                if (matchName || matchFamily) {
                     highlightIds.add(p.id);
                     let cur = p;
                     while (cur.fatherId) {
@@ -1066,7 +957,7 @@
         // 11. ВСПОМОГАТЕЛЬНЫЕ
         // ============================================================
         function buildFamilyFilter() {
-            const families = [...new Set(people.map(p => p.family))].sort();
+            const families = [...new Set(people.map(p => p.family).filter(f => f && f !== ''))].sort();
             const sel = document.getElementById('familyFilter');
             const current = sel.value;
             sel.innerHTML = '<option value="">Все семьи</option>';
@@ -1088,8 +979,7 @@
             if (pass === 'admin2026') {
                 document.getElementById('login-overlay').classList.add('hidden');
                 localStorage.setItem('dendro_pass', 'admin2026');
-                setTimeout(() => { centerView();
-                    render(); }, 200);
+                setTimeout(() => { centerView(); render(); }, 200);
             } else {
                 document.getElementById('login-error').style.display = 'block';
                 document.getElementById('loginPass').value = '';
