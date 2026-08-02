@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Древо тейпа Хачиро</title>
-    <!-- Подключаем красивые шрифты -->
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <title>Древо тейпа Хьачарой</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -16,170 +15,130 @@
             -webkit-user-select: none;
         }
         body {
-            font-family: 'Cormorant Garamond', 'Georgia', 'Times New Roman', serif;
-            background: #0a0806;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
             overflow: hidden;
             height: 100vh;
             position: fixed;
             width: 100%;
             touch-action: none;
+            color: #1a1a2e;
         }
 
-        /* Эффект старого пергамента */
-        body::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            background:
-                radial-gradient(ellipse at 20% 30%, rgba(80, 55, 30, 0.25) 0%, transparent 60%),
-                radial-gradient(ellipse at 80% 70%, rgba(60, 40, 20, 0.2) 0%, transparent 50%),
-                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(40, 30, 20, 0.08) 2px, rgba(40, 30, 20, 0.08) 4px);
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        /* Шапка с восточным стилем */
         #header {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             z-index: 100;
-            background: linear-gradient(180deg, rgba(10, 8, 6, 0.98) 0%, rgba(10, 8, 6, 0.92) 100%);
-            padding: 12px 20px;
+            background: #ffffff;
+            padding: 10px 24px;
             display: flex;
             flex-wrap: wrap;
             align-items: center;
-            gap: 10px;
-            border-bottom: 2px solid #b8860b;
-            box-shadow: 0 4px 40px rgba(0, 0, 0, 0.9), inset 0 0 60px rgba(40, 30, 15, 0.05);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            gap: 12px;
+            border-bottom: 1px solid #e8edf2;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
         }
         #header h1 {
-            font-family: 'Playfair Display', 'Georgia', serif;
-            font-size: 22px;
+            font-family: 'Inter', sans-serif;
+            font-size: 18px;
             font-weight: 700;
-            font-style: italic;
-            color: #d4a843;
-            text-shadow: 0 0 40px rgba(212, 168, 67, 0.12), 0 2px 4px rgba(0, 0, 0, 0.5);
-            letter-spacing: 5px;
-            margin-right: 14px;
+            color: #1a1a2e;
+            letter-spacing: -0.3px;
+            margin-right: 16px;
             white-space: nowrap;
-            position: relative;
-        }
-        #header h1::after {
-            content: '✦';
-            font-style: normal;
-            font-size: 14px;
-            color: #6a5a3a;
-            margin-left: 10px;
         }
         #header h1 span {
-            font-family: 'Cormorant Garamond', serif;
             font-weight: 400;
-            font-style: italic;
-            color: #7a6a4a;
+            color: #6b7a8f;
             font-size: 14px;
-            letter-spacing: 3px;
+            margin-left: 6px;
         }
         #searchInput {
             flex: 1;
-            min-width: 130px;
-            padding: 8px 18px;
-            border-radius: 30px;
-            border: 1px solid #3a2a1a;
-            background: rgba(20, 15, 10, 0.85);
-            color: #e8ddd0;
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 16px;
-            font-style: italic;
+            min-width: 160px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1.5px solid #dce3eb;
+            background: #f8fafc;
+            color: #1a1a2e;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            font-weight: 400;
             outline: none;
-            transition: all 0.4s;
-            letter-spacing: 0.5px;
+            transition: all 0.2s;
         }
         #searchInput:focus {
-            border-color: #d4a843;
-            box-shadow: 0 0 30px rgba(212, 168, 67, 0.08);
-            background: rgba(25, 18, 12, 0.95);
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            background: #ffffff;
         }
         #searchInput::placeholder {
-            color: #5a4a3a;
-            font-style: italic;
-            letter-spacing: 1px;
+            color: #9aa8b9;
         }
         #familyFilter {
-            padding: 8px 16px;
-            border-radius: 30px;
-            border: 1px solid #3a2a1a;
-            background: rgba(20, 15, 10, 0.85);
-            color: #e8ddd0;
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 15px;
-            font-style: italic;
+            padding: 8px 14px;
+            border-radius: 8px;
+            border: 1.5px solid #dce3eb;
+            background: #f8fafc;
+            color: #1a1a2e;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            font-weight: 400;
             outline: none;
             cursor: pointer;
-            max-width: 150px;
-            transition: 0.3s;
-            letter-spacing: 0.5px;
+            min-width: 130px;
+            transition: 0.2s;
         }
         #familyFilter:focus {
-            border-color: #d4a843;
-        }
-        #familyFilter option {
-            background: #1a150e;
-            font-style: normal;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
         .header-btn {
             padding: 8px 18px;
-            border-radius: 30px;
-            border: 1px solid #4a3a2a;
-            background: rgba(30, 20, 10, 0.6);
-            color: #aa9a7a;
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 15px;
-            font-style: italic;
+            border-radius: 8px;
+            border: 1.5px solid #dce3eb;
+            background: #f8fafc;
+            color: #1a1a2e;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
             cursor: pointer;
-            transition: all 0.3s;
-            letter-spacing: 1px;
+            transition: all 0.2s;
             white-space: nowrap;
         }
         .header-btn:hover {
-            background: rgba(50, 35, 20, 0.8);
-            border-color: #b8860b;
-            color: #d4a843;
-            transform: scale(1.03);
-            box-shadow: 0 0 25px rgba(212, 168, 67, 0.05);
+            background: #eef2f7;
+            border-color: #bcc9d9;
         }
         .header-btn.admin {
-            border-color: #6a2a1a;
-            color: #8a5a3a;
-            font-style: normal;
+            background: #1a1a2e;
+            color: #ffffff;
+            border-color: #1a1a2e;
         }
         .header-btn.admin:hover {
-            border-color: #aa3a1a;
-            color: #d46a3a;
-            box-shadow: 0 0 30px rgba(180, 50, 20, 0.08);
+            background: #2d2d4a;
+            border-color: #2d2d4a;
         }
         #stats {
-            color: #5a4a3a;
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 14px;
-            font-style: italic;
+            color: #6b7a8f;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            font-weight: 400;
             white-space: nowrap;
             margin-left: 4px;
-            letter-spacing: 1px;
         }
 
-        /* Канвас */
         #canvas-wrapper {
             position: fixed;
-            top: 72px;
+            top: 64px;
             left: 0;
             right: 0;
             bottom: 0;
             z-index: 1;
             touch-action: none;
+            background: #f5f7fa;
         }
         #treeCanvas {
             width: 100%;
@@ -192,99 +151,60 @@
             cursor: grabbing;
         }
 
-        /* Тултип с восточным стилем */
         #tooltip {
             position: fixed;
             display: none;
-            background: rgba(12, 10, 8, 0.98);
-            border: 1px solid #b8860b;
-            border-radius: 16px;
-            padding: 20px 28px;
-            min-width: 240px;
+            background: #ffffff;
+            border: 1px solid #e8edf2;
+            border-radius: 12px;
+            padding: 16px 20px;
+            min-width: 200px;
             pointer-events: none;
             z-index: 200;
-            box-shadow: 0 8px 60px rgba(0, 0, 0, 0.95), inset 0 0 60px rgba(60, 40, 20, 0.04);
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
-            animation: tooltipIn 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-        }
-        @keyframes tooltipIn {
-            0% {
-                opacity: 0;
-                transform: translateY(-12px) scale(0.96);
-            }
-            100% {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
         }
         #tooltip .name {
-            font-family: 'Playfair Display', 'Georgia', serif;
-            font-size: 26px;
-            font-weight: 700;
-            font-style: italic;
-            color: #d4a843;
-            letter-spacing: 2px;
-            text-shadow: 0 0 30px rgba(212, 168, 67, 0.06);
+            font-family: 'Inter', sans-serif;
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a1a2e;
         }
         #tooltip .family {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 16px;
-            font-style: italic;
-            color: #aa9a7a;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            font-weight: 400;
+            color: #6b7a8f;
             margin-top: 2px;
-            letter-spacing: 1px;
-        }
-        #tooltip .family::before {
-            content: '◈ ';
-            color: #5a4a3a;
-            font-style: normal;
         }
         #tooltip .lineage {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 13px;
-            color: #6a5a4a;
-            margin-top: 10px;
-            border-top: 1px solid #2a1f0e;
-            padding-top: 10px;
-            font-style: italic;
-            letter-spacing: 0.5px;
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            font-weight: 400;
+            color: #9aa8b9;
+            margin-top: 8px;
+            border-top: 1px solid #eef2f7;
+            padding-top: 8px;
         }
         #tooltip .lineage span {
-            color: #aa8a5a;
-            font-style: normal;
-            font-weight: 600;
+            color: #1a1a2e;
+            font-weight: 500;
         }
 
-        /* Админ-панель */
         #admin-panel {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
+            bottom: 24px;
+            right: 24px;
             z-index: 150;
             display: none;
-            background: rgba(10, 8, 6, 0.99);
-            border: 1px solid #b8860b;
-            border-radius: 18px;
-            padding: 26px 30px;
+            background: #ffffff;
+            border: 1px solid #e8edf2;
+            border-radius: 16px;
+            padding: 24px 28px;
             min-width: 320px;
             max-width: 92vw;
             max-height: 80vh;
             overflow-y: auto;
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            box-shadow: 0 8px 70px rgba(0, 0, 0, 0.98), inset 0 0 60px rgba(40, 30, 15, 0.03);
-            animation: panelIn 0.3s ease-out;
-        }
-        @keyframes panelIn {
-            0% {
-                opacity: 0;
-                transform: scale(0.95) translateY(10px);
-            }
-            100% {
-                opacity: 1;
-                transform: scale(1) translateY(0);
-            }
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.08);
         }
         #admin-panel.active {
             display: block;
@@ -293,236 +213,201 @@
             width: 4px;
         }
         #admin-panel::-webkit-scrollbar-track {
-            background: #0d0a08;
+            background: #f0f2f5;
         }
         #admin-panel::-webkit-scrollbar-thumb {
-            background: #5a4a2a;
-            border-radius: 2px;
+            background: #d0d7e0;
+            border-radius: 4px;
         }
         #admin-panel h3 {
-            font-family: 'Playfair Display', serif;
-            font-weight: 700;
-            font-style: italic;
-            color: #d4a843;
-            font-size: 20px;
-            letter-spacing: 2px;
-            margin-bottom: 18px;
-            border-bottom: 1px solid #2a1f0e;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            color: #1a1a2e;
+            font-size: 16px;
+            letter-spacing: -0.2px;
+            margin-bottom: 16px;
+            border-bottom: 1px solid #eef2f7;
             padding-bottom: 12px;
         }
         #admin-panel label {
             display: block;
-            margin: 14px 0 4px;
-            color: #8a7a5a;
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 13px;
-            font-style: italic;
-            letter-spacing: 1.5px;
+            margin: 12px 0 4px;
+            color: #6b7a8f;
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            font-weight: 500;
             text-transform: uppercase;
+            letter-spacing: 0.3px;
         }
         #admin-panel select,
         #admin-panel input {
             width: 100%;
-            padding: 10px 16px;
-            border-radius: 10px;
-            border: 1px solid #2a1f0e;
-            background: #14100a;
-            color: #e8ddd0;
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 16px;
-            font-style: italic;
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 1.5px solid #dce3eb;
+            background: #f8fafc;
+            color: #1a1a2e;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            font-weight: 400;
             outline: none;
-            transition: 0.3s;
+            transition: 0.2s;
         }
         #admin-panel select:focus,
         #admin-panel input:focus {
-            border-color: #b8860b;
-            box-shadow: 0 0 20px rgba(212, 168, 67, 0.04);
-        }
-        #admin-panel select option {
-            font-style: normal;
-            background: #14100a;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
         }
         .admin-btn-submit {
-            margin-top: 18px;
+            margin-top: 16px;
             width: 100%;
             padding: 12px;
-            background: linear-gradient(135deg, #2a1f0e, #1a150e);
-            border: 1px solid #b8860b;
-            border-radius: 10px;
-            color: #d4a843;
-            font-family: 'Playfair Display', serif;
-            font-size: 17px;
-            font-style: italic;
+            background: #1a1a2e;
+            border: none;
+            border-radius: 8px;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
-            letter-spacing: 2px;
+            transition: all 0.2s;
         }
         .admin-btn-submit:hover {
-            background: linear-gradient(135deg, #3a2f1e, #2a1f0e);
-            box-shadow: 0 0 40px rgba(212, 168, 67, 0.06);
-            transform: scale(1.01);
+            background: #2d2d4a;
         }
         .close-admin {
             position: absolute;
-            top: 14px;
-            right: 20px;
+            top: 12px;
+            right: 16px;
             background: none;
             border: none;
-            color: #5a3a2a;
-            font-size: 30px;
+            color: #9aa8b9;
+            font-size: 24px;
             cursor: pointer;
-            transition: all 0.3s;
-            font-family: serif;
+            transition: 0.2s;
             line-height: 1;
         }
         .close-admin:hover {
-            color: #8a5a3a;
-            transform: rotate(90deg);
+            color: #1a1a2e;
         }
         .admin-divider {
             border: none;
-            border-top: 1px solid #1a150e;
-            margin: 20px 0;
+            border-top: 1px solid #eef2f7;
+            margin: 18px 0;
         }
         .admin-note {
-            color: #4a3a2a;
-            font-family: 'Cormorant Garamond', serif;
+            color: #9aa8b9;
+            font-family: 'Inter', sans-serif;
             font-size: 12px;
-            font-style: italic;
+            font-weight: 400;
             margin-top: 10px;
             text-align: center;
-            letter-spacing: 0.5px;
         }
 
-        /* Логин */
         #login-overlay {
             position: fixed;
             inset: 0;
             z-index: 500;
-            background: rgba(0, 0, 0, 0.94);
+            background: rgba(0, 0, 0, 0.5);
             display: flex;
             align-items: center;
             justify-content: center;
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
         }
         #login-overlay.hidden {
             display: none;
         }
         #login-box {
-            background: radial-gradient(ellipse at center, rgba(25, 18, 12, 0.98), rgba(8, 6, 4, 0.98));
-            border: 1px solid #b8860b;
-            border-radius: 24px;
-            padding: 50px 44px;
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 48px 40px;
             min-width: 360px;
             max-width: 92vw;
             text-align: center;
-            box-shadow: 0 8px 100px rgba(0, 0, 0, 0.9), inset 0 0 80px rgba(60, 40, 20, 0.03);
-            animation: loginIn 0.6s ease-out;
-        }
-        @keyframes loginIn {
-            0% {
-                opacity: 0;
-                transform: scale(0.94) translateY(20px);
-            }
-            100% {
-                opacity: 1;
-                transform: scale(1) translateY(0);
-            }
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
         }
         #login-box .logo {
-            font-size: 54px;
+            font-size: 40px;
             margin-bottom: 4px;
             display: block;
         }
         #login-box h2 {
-            font-family: 'Playfair Display', serif;
+            font-family: 'Inter', sans-serif;
             font-weight: 700;
-            font-style: italic;
-            color: #d4a843;
-            font-size: 34px;
-            letter-spacing: 8px;
-            text-shadow: 0 0 50px rgba(212, 168, 67, 0.06);
+            color: #1a1a2e;
+            font-size: 26px;
+            letter-spacing: -0.5px;
         }
         #login-box .sub {
-            font-family: 'Cormorant Garamond', serif;
-            color: #5a4a3a;
-            font-size: 15px;
-            font-style: italic;
-            letter-spacing: 8px;
-            margin-bottom: 30px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 400;
+            color: #6b7a8f;
+            font-size: 14px;
+            letter-spacing: 0.3px;
+            margin-bottom: 28px;
             margin-top: 2px;
         }
         #login-box input {
             width: 100%;
-            padding: 14px 20px;
-            border-radius: 12px;
-            border: 1px solid #2a1f0e;
-            background: rgba(20, 15, 10, 0.9);
-            color: #e8ddd0;
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 20px;
-            font-style: italic;
-            margin-bottom: 18px;
+            padding: 14px 18px;
+            border-radius: 10px;
+            border: 1.5px solid #dce3eb;
+            background: #f8fafc;
+            color: #1a1a2e;
+            font-family: 'Inter', sans-serif;
+            font-size: 16px;
+            font-weight: 400;
+            margin-bottom: 16px;
             outline: none;
             text-align: center;
-            letter-spacing: 6px;
-            transition: 0.3s;
+            letter-spacing: 2px;
+            transition: 0.2s;
         }
         #login-box input:focus {
-            border-color: #b8860b;
-            box-shadow: 0 0 40px rgba(212, 168, 67, 0.04);
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
         }
         #login-box button {
             width: 100%;
             padding: 14px;
-            background: linear-gradient(135deg, #2a1f0e, #1a150e);
-            border: 1px solid #b8860b;
-            border-radius: 12px;
-            color: #d4a843;
-            font-family: 'Playfair Display', serif;
-            font-size: 20px;
-            font-style: italic;
+            background: #1a1a2e;
+            border: none;
+            border-radius: 10px;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            font-size: 16px;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
-            letter-spacing: 4px;
+            transition: all 0.2s;
         }
         #login-box button:hover {
-            background: linear-gradient(135deg, #3a2f1e, #2a1f0e);
-            box-shadow: 0 0 60px rgba(212, 168, 67, 0.04);
-            transform: scale(1.01);
+            background: #2d2d4a;
         }
         #login-error {
-            color: #8a3a2a;
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 15px;
-            font-style: italic;
-            margin-top: 16px;
+            color: #dc2626;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            font-weight: 400;
+            margin-top: 14px;
             display: none;
-            letter-spacing: 1px;
         }
 
-        /* Адаптация */
         @media (max-width: 768px) {
             #header {
-                padding: 8px 12px;
-                gap: 6px;
+                padding: 8px 14px;
+                gap: 8px;
             }
             #header h1 {
-                font-size: 17px;
-                letter-spacing: 3px;
-            }
-            #header h1::after {
-                display: none;
+                font-size: 16px;
             }
             #header h1 span {
                 font-size: 12px;
             }
             #searchInput {
-                font-size: 14px;
+                font-size: 13px;
                 min-width: 80px;
-                padding: 6px 14px;
+                padding: 6px 12px;
             }
             #familyFilter {
                 font-size: 13px;
@@ -530,7 +415,7 @@
                 padding: 6px 12px;
             }
             .header-btn {
-                font-size: 13px;
+                font-size: 12px;
                 padding: 6px 12px;
             }
             #stats {
@@ -542,26 +427,21 @@
                 left: 10px;
                 min-width: unset;
                 padding: 18px 16px;
-                max-height: 65vh;
             }
             #login-box {
                 padding: 32px 24px;
                 min-width: unset;
-                width: 94vw;
+                width: 92vw;
             }
             #login-box h2 {
-                font-size: 28px;
-                letter-spacing: 4px;
-            }
-            #tooltip {
-                min-width: 170px;
-                padding: 14px 18px;
-            }
-            #tooltip .name {
                 font-size: 22px;
             }
-            #tooltip .family {
-                font-size: 14px;
+            #tooltip {
+                min-width: 160px;
+                padding: 12px 16px;
+            }
+            #tooltip .name {
+                font-size: 16px;
             }
         }
         @media (max-width: 420px) {
@@ -570,14 +450,13 @@
                 gap: 4px;
             }
             #header h1 {
-                font-size: 14px;
-                letter-spacing: 1px;
+                font-size: 13px;
                 margin-right: 4px;
             }
             #searchInput {
-                font-size: 12px;
+                font-size: 11px;
                 min-width: 50px;
-                padding: 4px 10px;
+                padding: 4px 8px;
             }
             #familyFilter {
                 font-size: 11px;
@@ -585,7 +464,7 @@
                 padding: 4px 8px;
             }
             .header-btn {
-                font-size: 11px;
+                font-size: 10px;
                 padding: 4px 8px;
             }
             #stats {
@@ -596,86 +475,67 @@
 </head>
 <body>
 
-    <!-- Логин -->
     <div id="login-overlay">
         <div id="login-box">
             <span class="logo">⚔️</span>
-            <h2>ХАЧИРО</h2>
-            <div class="sub">родословная · тейп</div>
-            <input type="password" id="loginPass" placeholder="✦ ✦ ✦ ✦ ✦ ✦" maxlength="20" autofocus>
-            <button onclick="checkLogin()">Войти в древо</button>
-            <div id="login-error">⛔ Неверный ключ доступа</div>
+            <h2>Хьачарой</h2>
+            <div class="sub">Генеалогическое древо тейпа</div>
+            <input type="password" id="loginPass" placeholder="······" maxlength="20" autofocus>
+            <button onclick="checkLogin()">Войти</button>
+            <div id="login-error">Неверный пароль</div>
         </div>
     </div>
 
-    <!-- Шапка -->
     <div id="header">
-        <h1>ХАЧИРО <span>· тейп</span></h1>
-        <input type="text" id="searchInput" placeholder="🔍 Поиск по имени..." oninput="searchByName(this.value)">
+        <h1>Хьачарой <span>· тейп</span></h1>
+        <input type="text" id="searchInput" placeholder="Поиск по имени..." oninput="searchByName(this.value)">
         <select id="familyFilter" onchange="filterByFamily(this.value)">
-            <option value="">Все гары</option>
+            <option value="">Все семьи</option>
         </select>
-        <button class="header-btn" onclick="resetView()">⟲ Сброс</button>
+        <button class="header-btn" onclick="resetView()">Сброс</button>
         <span id="stats">0</span>
-        <button class="header-btn admin" onclick="toggleAdmin()">⚙</button>
+        <button class="header-btn admin" onclick="toggleAdmin()">Админ</button>
     </div>
 
-    <!-- Канвас -->
     <div id="canvas-wrapper">
         <canvas id="treeCanvas"></canvas>
     </div>
 
-    <!-- Тултип -->
     <div id="tooltip">
         <div class="name" id="tipName">—</div>
         <div class="family" id="tipFamily">—</div>
         <div class="lineage" id="tipLineage">—</div>
     </div>
 
-    <!-- Админ-панель -->
     <div id="admin-panel">
         <button class="close-admin" onclick="toggleAdmin()">✕</button>
-        <h3>⚔️ Добавить сына</h3>
-        <label>Отец (выбери из списка)</label>
+        <h3>Добавить сына</h3>
+        <label>Отец</label>
         <select id="fatherSelect"></select>
         <label>Имя сына</label>
-        <input type="text" id="newSonName" placeholder="Например: Аслан">
+        <input type="text" id="newSonName" placeholder="Введите имя">
         <label>Семья (гар)</label>
-        <input type="text" id="newSonFamily" placeholder="Например: Адаговы">
+        <input type="text" id="newSonFamily" placeholder="Напр. Ведчарой">
         <button class="admin-btn-submit" onclick="addSon()">➕ Добавить</button>
         <hr class="admin-divider">
-        <h3>✏️ Редактировать</h3>
-        <label>Выбрать человека</label>
-        <select id="editSelect"></select>
-        <label>Новое имя</label>
-        <input type="text" id="editName" placeholder="Новое имя">
-        <label>Новая семья</label>
-        <input type="text" id="editFamily" placeholder="Новая семья">
-        <button class="admin-btn-submit" onclick="editPerson()">💾 Сохранить</button>
-        <div class="admin-note">Все изменения сохраняются в браузере</div>
+        <div class="admin-note">Для редактирования имени нажми на карточку (в режиме Админ)</div>
     </div>
 
     <script>
         // ============================================================
-        // 1. ДАННЫЕ — ЧИСТО! Только ОДИН пример.
-        //    Ты добавишь своих 800+ человек сюда.
+        // 1. ДАННЫЕ — чисто, только корень
         // ============================================================
         let people = [
-            { id: 'root1', name: 'Корень', family: 'Хачиро', fatherId: null }
+            { id: 'root1', name: 'Корень', family: 'Ведчарой', fatherId: null }
         ];
 
-        // Цвета для семей (гаров) — благородные
         const familyColors = {
-            'Хачиро': '#b8860b',
-            // Добавишь свои семьи с цветами:
-            // 'Адаговы': '#8b1a4a',
-            // 'Мирзоевы': '#1a6a5a',
-            // 'Цуцаевы': '#8a6a2a',
+            'Ведчарой': '#2563eb',
         };
 
         function getFamilyColor(family) {
             if (familyColors[family]) return familyColors[family];
-            const palette = ['#8b1a4a', '#1a6a5a', '#8a6a2a', '#2a4a7a', '#6a3a5a', '#3a6a4a', '#7a4a2a', '#2a5a6a'];
+            const palette = ['#2563eb', '#7c3aed', '#0891b2', '#059669', '#d97706', '#dc2626', '#4f46e5', '#0d9488'];
             const idx = Object.keys(familyColors).length % palette.length;
             familyColors[family] = palette[idx];
             return familyColors[family];
@@ -697,9 +557,13 @@
         let canvas, ctx;
         let nodePositions = new Map();
         const NODE_W = 140,
-            NODE_H = 54;
-        const LVL_GAP = 70,
-            NODE_GAP = 22;
+            NODE_H = 50;
+        const LVL_GAP = 60,
+            NODE_GAP = 18;
+
+        let editMode = false;
+        let editingId = null;
+        let adminActive = false;
 
         // ============================================================
         // 3. ИНИЦИАЛИЗАЦИЯ
@@ -746,9 +610,6 @@
             ctx.scale(dpr, dpr);
         }
 
-        // ============================================================
-        // 4. ЦЕНТРИРОВКА
-        // ============================================================
         function centerView() {
             const posMap = computeLayout();
             if (posMap.size === 0) return;
@@ -768,17 +629,14 @@
             const h = canvas.height / (window.devicePixelRatio || 1);
             const treeW = maxX - minX + NODE_W;
             const treeH = maxY - minY + NODE_H;
-            const scaleX = (w - 60) / (treeW + 80);
-            const scaleY = (h - 60) / (treeH + 80);
+            const scaleX = (w - 60) / (treeW + 60);
+            const scaleY = (h - 60) / (treeH + 60);
             scale = Math.min(scaleX, scaleY, 1.2);
             scale = Math.max(scale, 0.25);
             offsetX = 0;
             offsetY = 0;
         }
 
-        // ============================================================
-        // 5. РАСЧЕТ ПОЗИЦИЙ (СВЕРХУ-ВНИЗ)
-        // ============================================================
         function computeLayout() {
             const childrenMap = new Map();
             people.forEach(p => {
@@ -813,11 +671,6 @@
             });
             return posMap;
         }
-
-        // ============================================================
-        // 6. ОТРИСОВКА С АНИМАЦИЕЙ
-        // ============================================================
-        let animFrame = 0;
 
         function render() {
             const dpr = window.devicePixelRatio || 1;
@@ -861,24 +714,13 @@
                 ctx.lineTo(to.x + NODE_W / 2, midY);
                 ctx.lineTo(to.x + NODE_W / 2, to.y);
 
-                if (isHighlight) {
-                    ctx.shadowColor = '#d4a843';
-                    ctx.shadowBlur = 18;
-                    ctx.strokeStyle = '#d4a843';
-                    ctx.lineWidth = 2.5;
-                } else {
-                    ctx.shadowColor = 'rgba(0,0,0,0)';
-                    ctx.shadowBlur = 0;
-                    ctx.strokeStyle = '#3a2a1a';
-                    ctx.lineWidth = 1.8;
-                }
+                ctx.strokeStyle = isHighlight ? '#2563eb' : '#d0d7e0';
+                ctx.lineWidth = isHighlight ? 2.5 : 1.5;
                 ctx.stroke();
-                ctx.shadowBlur = 0;
             });
 
             // Карточки
-            const now = Date.now();
-            people.forEach((p, idx) => {
+            people.forEach(p => {
                 const pos = posMap.get(p.id);
                 if (!pos) return;
                 const x = pos.x;
@@ -886,72 +728,64 @@
                 const isHighlight = highlightIds.has(p.id);
                 const isDim = dimFamily && p.family !== dimFamily;
                 const color = getFamilyColor(p.family);
+                const isEditing = (editingId === p.id);
 
-                // Анимация появления
-                const delay = idx * 15;
-                const age = Math.max(0, (now - (window._startTime || now)) - delay);
-                const appear = Math.min(1, age / 400);
-                const scaleY = isDim ? 1 : (0.3 + 0.7 * appear);
+                ctx.globalAlpha = isDim ? 0.2 : 1;
 
-                ctx.globalAlpha = isDim ? 0.15 : 1;
+                ctx.fillStyle = isHighlight ? '#eff6ff' : '#ffffff';
+                ctx.strokeStyle = isHighlight ? '#2563eb' : '#dce3eb';
+                ctx.lineWidth = isHighlight ? 2 : 1.5;
 
-                // Тень
-                if (isHighlight) {
-                    ctx.shadowColor = '#d4a843';
-                    ctx.shadowBlur = 35;
-                } else {
-                    ctx.shadowColor = 'rgba(0,0,0,0.8)';
-                    ctx.shadowBlur = 15;
-                }
+                ctx.shadowColor = isHighlight ? 'rgba(37, 99, 235, 0.15)' : 'rgba(0,0,0,0.04)';
+                ctx.shadowBlur = isHighlight ? 16 : 8;
+                ctx.shadowOffsetY = 2;
 
-                const grad = ctx.createLinearGradient(x, y, x + NODE_W, y + NODE_H);
-                if (isHighlight) {
-                    grad.addColorStop(0, '#3d2d0a');
-                    grad.addColorStop(1, '#1a150e');
-                } else {
-                    grad.addColorStop(0, '#1a150e');
-                    grad.addColorStop(1, '#0d0a08');
-                }
-                ctx.fillStyle = grad;
-
-                ctx.strokeStyle = isHighlight ? '#d4a843' : color;
-                ctx.lineWidth = isHighlight ? 2.5 : 1.5;
-
-                // Анимируем появление
-                const drawY = y + (1 - scaleY) * NODE_H / 2;
-                const drawH = NODE_H * scaleY;
-                if (drawH < 2) return;
-
-                roundRect(ctx, x, drawY, NODE_W, drawH, 10);
+                roundRect(ctx, x, y, NODE_W, NODE_H, 8);
                 ctx.fill();
                 ctx.stroke();
+
                 ctx.shadowBlur = 0;
+                ctx.shadowOffsetY = 0;
 
-                // Имя
-                ctx.fillStyle = isHighlight ? '#f0d080' : '#e8ddd0';
-                ctx.font = 'bold 18px "Playfair Display", "Georgia", serif';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                const nameY = drawY + drawH / 2 - 4;
-                ctx.fillText(p.name, x + NODE_W / 2, nameY);
+                if (isEditing && editMode) {
+                    ctx.fillStyle = '#ffffff';
+                    roundRect(ctx, x + 8, y + 6, NODE_W - 16, NODE_H - 12, 4);
+                    ctx.fill();
+                    ctx.strokeStyle = '#2563eb';
+                    ctx.lineWidth = 1.5;
+                    roundRect(ctx, x + 8, y + 6, NODE_W - 16, NODE_H - 12, 4);
+                    ctx.stroke();
+                    ctx.fillStyle = '#1a1a2e';
+                    ctx.font = '600 15px Inter, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('✎ ' + p.name, x + NODE_W / 2, y + NODE_H / 2);
+                } else {
+                    ctx.fillStyle = '#1a1a2e';
+                    ctx.font = '600 15px Inter, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(p.name, x + NODE_W / 2, y + NODE_H / 2 - 4);
 
-                // Семья
-                if (drawH > 30) {
-                    ctx.fillStyle = isDim ? '#3a2a1a' : (isHighlight ? '#b89a6a' : '#6a5a4a');
-                    ctx.font = '12px "Cormorant Garamond", "Georgia", serif';
-                    ctx.fontStyle = 'italic';
-                    ctx.fillText(p.family, x + NODE_W / 2, nameY + 20);
+                    ctx.fillStyle = '#6b7a8f';
+                    ctx.font = '11px Inter, sans-serif';
+                    ctx.fontWeight = '400';
+                    ctx.fillText(p.family, x + NODE_W / 2, y + NODE_H / 2 + 16);
+                }
+
+                if (editMode) {
+                    ctx.fillStyle = '#2563eb';
+                    ctx.font = '18px Inter, sans-serif';
+                    ctx.textAlign = 'right';
+                    ctx.textBaseline = 'bottom';
+                    ctx.fillText('+', x + NODE_W - 8, y + NODE_H - 4);
                 }
 
                 ctx.globalAlpha = 1;
             });
 
             ctx.restore();
-            animFrame = requestAnimationFrame(render);
         }
-
-        // Запускаем таймер для анимации
-        window._startTime = Date.now();
 
         function roundRect(ctx, x, y, w, h, r) {
             ctx.beginPath();
@@ -968,7 +802,7 @@
         }
 
         // ============================================================
-        // 7. УПРАВЛЕНИЕ (МЫШЬ + ТАЧ)
+        // 7. УПРАВЛЕНИЕ
         // ============================================================
         function getCanvasCoords(e) {
             const rect = canvas.getBoundingClientRect();
@@ -996,6 +830,7 @@
                 const dy = (pos.y - dragStartY) / scale;
                 offsetX = dragStartOffX + dx;
                 offsetY = dragStartOffY + dy;
+                render();
             }
         }
 
@@ -1035,6 +870,7 @@
                 const dy = (touches[0].clientY - touchStartY) / scale;
                 offsetX = touchStartOffX + dx;
                 offsetY = touchStartOffY + dy;
+                render();
             } else if (touches.length === 2) {
                 const dx = touches[0].clientX - touches[1].clientX;
                 const dy = touches[0].clientY - touches[1].clientY;
@@ -1042,6 +878,7 @@
                 if (lastTouchDist > 0) {
                     const delta = dist / lastTouchDist;
                     scale = Math.min(Math.max(scale * delta, 0.15), 3.5);
+                    render();
                 }
                 lastTouchDist = dist;
             }
@@ -1052,9 +889,6 @@
             lastTouchDist = 0;
         }
 
-        // ============================================================
-        // 8. КОЛЕСИКО
-        // ============================================================
         function onWheel(e) {
             e.preventDefault();
             const delta = e.deltaY > 0 ? 0.92 : 1.08;
@@ -1069,10 +903,11 @@
             offsetX = (offsetX - (mx - w / 2) / scale) * ratio + (mx - w / 2) / newScale;
             offsetY = (offsetY - (my - h / 2) / scale) * ratio + (my - h / 2) / newScale;
             scale = newScale;
+            render();
         }
 
         // ============================================================
-        // 9. КЛИК
+        // 8. КЛИК
         // ============================================================
         function onClick(e) {
             const rect = canvas.getBoundingClientRect();
@@ -1115,24 +950,43 @@
 
             if (found) {
                 const p = people.find(pp => pp.id === found);
-                if (p) {
-                    showTooltip(e.clientX, e.clientY, p);
-                    highlightIds.clear();
-                    let cur = p;
-                    while (cur) {
-                        highlightIds.add(cur.id);
-                        const father = people.find(pp => pp.id === cur.fatherId);
-                        cur = father;
+                if (!p) return;
+
+                if (editMode) {
+                    editingId = found;
+                    render();
+                    const newName = prompt('✏️ Редактирование\n\nИмя:', p.name);
+                    if (newName !== null && newName.trim() !== '') {
+                        p.name = newName.trim();
+                        saveToStorage();
+                        buildFamilyFilter();
+                        updateStats();
+                        render();
+                        alert('✅ Имя обновлено!');
                     }
+                    editingId = null;
+                    render();
+                    return;
                 }
+
+                showTooltip(e.clientX, e.clientY, p);
+                highlightIds.clear();
+                let cur = p;
+                while (cur) {
+                    highlightIds.add(cur.id);
+                    const father = people.find(pp => pp.id === cur.fatherId);
+                    cur = father;
+                }
+                render();
             } else {
                 highlightIds.clear();
                 document.getElementById('tooltip').style.display = 'none';
+                render();
             }
         }
 
         // ============================================================
-        // 10. ТУЛТИП
+        // 9. ТУЛТИП
         // ============================================================
         let tooltipTimeout;
 
@@ -1151,10 +1005,10 @@
             document.getElementById('tipLineage').innerHTML = 'Предки: <span>' + chain.join(' → ') + '</span>';
 
             tip.style.display = 'block';
-            let left = clientX + 18;
+            let left = clientX + 16;
             let top = clientY - 10;
-            if (left + 250 > window.innerWidth) left = clientX - 250;
-            if (top + 130 > window.innerHeight) top = window.innerHeight - 140;
+            if (left + 220 > window.innerWidth) left = clientX - 220;
+            if (top + 110 > window.innerHeight) top = window.innerHeight - 120;
             if (top < 10) top = 10;
             tip.style.left = left + 'px';
             tip.style.top = top + 'px';
@@ -1162,16 +1016,16 @@
             clearTimeout(tooltipTimeout);
             tooltipTimeout = setTimeout(() => {
                 tip.style.display = 'none';
-            }, 5000);
+            }, 4000);
         }
 
         // ============================================================
-        // 11. ПОИСК И ФИЛЬТР
+        // 10. ПОИСК И ФИЛЬТР
         // ============================================================
         function searchByName(query) {
             highlightIds.clear();
             dimFamily = null;
-            if (!query.trim()) return;
+            if (!query.trim()) { render(); return; }
             const q = query.trim().toLowerCase();
             people.forEach(p => {
                 if (p.name.toLowerCase().includes(q)) {
@@ -1185,11 +1039,13 @@
                     }
                 }
             });
+            render();
         }
 
         function filterByFamily(family) {
             dimFamily = family || null;
             highlightIds.clear();
+            render();
         }
 
         function resetView() {
@@ -1198,33 +1054,43 @@
             document.getElementById('searchInput').value = '';
             document.getElementById('familyFilter').value = '';
             centerView();
+            render();
             document.getElementById('tooltip').style.display = 'none';
         }
 
         // ============================================================
-        // 12. АДМИНКА
+        // 11. АДМИНКА
         // ============================================================
         function toggleAdmin() {
             const panel = document.getElementById('admin-panel');
+            adminActive = !adminActive;
             panel.classList.toggle('active');
-            if (panel.classList.contains('active')) populateSelects();
+            editMode = adminActive;
+
+            const btn = document.querySelector('.header-btn.admin');
+            if (adminActive) {
+                btn.style.background = '#2563eb';
+                btn.style.borderColor = '#2563eb';
+                btn.style.color = '#ffffff';
+                populateSelects();
+            } else {
+                btn.style.background = '#1a1a2e';
+                btn.style.borderColor = '#1a1a2e';
+                btn.style.color = '#ffffff';
+                editingId = null;
+            }
+            render();
         }
 
         function populateSelects() {
             const fatherSel = document.getElementById('fatherSelect');
-            const editSel = document.getElementById('editSelect');
             fatherSel.innerHTML = '';
-            editSel.innerHTML = '';
             const sorted = [...people].sort((a, b) => a.name.localeCompare(b.name));
             sorted.forEach(p => {
-                const opt1 = document.createElement('option');
-                opt1.value = p.id;
-                opt1.textContent = p.name + ' (' + p.family + ')';
-                fatherSel.appendChild(opt1);
-                const opt2 = document.createElement('option');
-                opt2.value = p.id;
-                opt2.textContent = p.name + ' (' + p.family + ')';
-                editSel.appendChild(opt2);
+                const opt = document.createElement('option');
+                opt.value = p.id;
+                opt.textContent = p.name + ' (' + p.family + ')';
+                fatherSel.appendChild(opt);
             });
         }
 
@@ -1240,31 +1106,14 @@
             updateStats();
             populateSelects();
             centerView();
+            render();
             document.getElementById('newSonName').value = '';
             document.getElementById('newSonFamily').value = '';
             alert('✅ ' + name + ' добавлен!');
         }
 
-        function editPerson() {
-            const id = document.getElementById('editSelect').value;
-            const name = document.getElementById('editName').value.trim();
-            const family = document.getElementById('editFamily').value.trim();
-            const p = people.find(pp => pp.id === id);
-            if (!p) { alert('⚠️ Не найден'); return; }
-            if (name) p.name = name;
-            if (family) p.family = family;
-            if (!name && !family) { alert('⚠️ Введите данные'); return; }
-            saveToStorage();
-            buildFamilyFilter();
-            updateStats();
-            populateSelects();
-            alert('✅ Обновлено!');
-            document.getElementById('editName').value = '';
-            document.getElementById('editFamily').value = '';
-        }
-
         // ============================================================
-        // 13. ХРАНЕНИЕ
+        // 12. ХРАНЕНИЕ
         // ============================================================
         function saveToStorage() {
             try { localStorage.setItem('dendro_people', JSON.stringify(people)); } catch (e) {}
@@ -1284,13 +1133,13 @@
         }
 
         // ============================================================
-        // 14. ВСПОМОГАТЕЛЬНЫЕ
+        // 13. ВСПОМОГАТЕЛЬНЫЕ
         // ============================================================
         function buildFamilyFilter() {
             const families = [...new Set(people.map(p => p.family))].sort();
             const sel = document.getElementById('familyFilter');
             const current = sel.value;
-            sel.innerHTML = '<option value="">Все гары</option>';
+            sel.innerHTML = '<option value="">Все семьи</option>';
             families.forEach(f => {
                 const opt = document.createElement('option');
                 opt.value = f;
@@ -1309,7 +1158,8 @@
             if (pass === 'admin2026') {
                 document.getElementById('login-overlay').classList.add('hidden');
                 localStorage.setItem('dendro_pass', 'admin2026');
-                setTimeout(() => { centerView(); }, 200);
+                setTimeout(() => { centerView();
+                    render(); }, 200);
             } else {
                 document.getElementById('login-error').style.display = 'block';
                 document.getElementById('loginPass').value = '';
@@ -1325,9 +1175,6 @@
             });
         });
 
-        // ============================================================
-        // 15. ЗАПУСК
-        // ============================================================
         window.onload = init;
     </script>
 </body>
