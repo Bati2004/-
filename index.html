@@ -323,7 +323,7 @@
         <h1>Хьачарой <span>· тейп</span></h1>
         <input type="text" id="searchInput" placeholder="🔍 Поиск по имени или фамилии..." oninput="searchByName(this.value)">
         <select id="familyFilter" onchange="filterByFamily(this.value)">
-            <option value="">Все семьи (гары)</option>
+            <option value="">Все семьи</option>
         </select>
         <button class="header-btn" onclick="resetView()">Сброс</button>
         <span id="stats">0</span>
@@ -352,7 +352,7 @@
         const familyColors = {};
 
         function getFamilyColor(family) {
-            if (!family) return '#6b7a8f'; // серый для безымянных
+            if (!family) return '#6b7a8f';
             if (familyColors[family]) return familyColors[family];
             const palette = ['#2563eb', '#7c3aed', '#0891b2', '#059669', '#d97706', '#dc2626', '#4f46e5', '#0d9488'];
             const idx = Object.keys(familyColors).length % palette.length;
@@ -553,38 +553,29 @@
                 ctx.shadowBlur = 0;
                 ctx.shadowOffsetY = 0;
 
-                // ============================================
-                // ИМЯ (крупно)
-                // ============================================
+                // Имя
                 ctx.fillStyle = '#1a1a2e';
                 ctx.font = '600 16px Inter, sans-serif';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
 
-                // Если есть фамилия — имя чуть выше
                 if (p.family && p.family !== '') {
                     ctx.fillText(p.name, x + NODE_W / 2, y + NODE_H / 2 - 6);
-                    // Фамилия (мелко снизу)
                     ctx.fillStyle = '#2563eb';
                     ctx.font = '11px Inter, sans-serif';
                     ctx.fillText(p.family, x + NODE_W / 2, y + NODE_H / 2 + 16);
                 } else {
-                    // Если фамилии нет — имя по центру
                     ctx.fillText(p.name, x + NODE_W / 2, y + NODE_H / 2);
                 }
 
-                // ============================================
                 // ✏️ и ➕ (только в админ-режиме)
-                // ============================================
                 if (editMode) {
-                    // ✏️ Карандаш — правый верхний угол
                     ctx.fillStyle = '#2563eb';
                     ctx.font = '18px Inter, sans-serif';
                     ctx.textAlign = 'right';
                     ctx.textBaseline = 'top';
                     ctx.fillText('✏️', x + NODE_W - 8, y + 4);
 
-                    // ➕ Плюс — внизу по центру
                     ctx.fillStyle = '#2563eb';
                     ctx.font = '20px Inter, sans-serif';
                     ctx.textAlign = 'center';
@@ -613,7 +604,7 @@
         }
 
         // ============================================================
-        // 5. УПРАВЛЕНИЕ
+        // 5. УПРАВЛЕНИЕ (МЫШЬ + ТАЧ)
         // ============================================================
         function getCanvasCoords(e) {
             const rect = canvas.getBoundingClientRect();
@@ -716,7 +707,7 @@
         }
 
         // ============================================================
-        // 6. КЛИК — обработка ✏️ и ➕
+        // 6. КЛИК — ОБРАБОТКА ✏️ И ➕
         // ============================================================
         function onClick(e) {
             const rect = canvas.getBoundingClientRect();
@@ -766,26 +757,24 @@
             if (!p) return;
 
             // ============================================
-            // АДМИН-РЕЖИМ: обрабатываем ✏️ и ➕
+            // АДМИН-РЕЖИМ
             // ============================================
             if (editMode) {
                 const pos = posMap.get(found);
                 const localX = (tx - pos.x) / NODE_W;
                 const localY = (ty - pos.y) / NODE_H;
 
-                // ➕ Плюсик внизу по центру — добавить сына
+                // ➕ Плюсик — добавить сына
                 if (localY > 0.75 && localX > 0.3 && localX < 0.7) {
                     const newName = prompt('➕ Добавить сына для "' + p.name + '"\n\nВведите имя:');
                     if (newName && newName.trim() !== '') {
                         const newId = 'p' + Date.now() + Math.random().toString(36).slice(2, 6);
-                        // Сын НЕ наследует фамилию — оставляем пустую
-                        const newPerson = {
+                        people.push({
                             id: newId,
                             name: newName.trim(),
-                            family: '', // пустая фамилия
+                            family: '',
                             fatherId: p.id
-                        };
-                        people.push(newPerson);
+                        });
                         saveToStorage();
                         buildFamilyFilter();
                         updateStats();
@@ -796,9 +785,8 @@
                     return;
                 }
 
-                // ✏️ Карандаш в правом верхнем углу — редактировать имя и фамилию
+                // ✏️ Карандаш — редактировать
                 if (localX > 0.78 && localY < 0.25) {
-                    const currentFamily = p.family || '(нет фамилии)';
                     const newName = prompt('✏️ Редактирование\n\nИмя:', p.name);
                     if (newName !== null && newName.trim() !== '') {
                         p.name = newName.trim();
@@ -815,7 +803,7 @@
                     return;
                 }
 
-                // Если кликнули по телу карточки — тултип
+                // Клик по телу карточки — тултип
                 showTooltip(e.clientX, e.clientY, p);
                 highlightIds.clear();
                 let cur = p;
