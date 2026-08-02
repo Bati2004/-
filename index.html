@@ -121,6 +121,10 @@
             background: #2d2d4a;
             border-color: #2d2d4a;
         }
+        .header-btn.admin.active {
+            background: #2563eb;
+            border-color: #2563eb;
+        }
         #stats {
             color: #6b7a8f;
             font-family: 'Inter', sans-serif;
@@ -518,12 +522,12 @@
         <input type="text" id="newSonFamily" placeholder="Напр. Ведчарой">
         <button class="admin-btn-submit" onclick="addSon()">➕ Добавить</button>
         <hr class="admin-divider">
-        <div class="admin-note">Для редактирования имени нажми на карточку (в режиме Админ)</div>
+        <div class="admin-note">В админ-режиме на карточках появятся ✏️ и ➕</div>
     </div>
 
     <script>
         // ============================================================
-        // 1. ДАННЫЕ — чисто, только корень
+        // 1. ДАННЫЕ
         // ============================================================
         let people = [
             { id: 'root1', name: 'Корень', family: 'Ведчарой', fatherId: null }
@@ -556,8 +560,8 @@
             dragStartOffY = 0;
         let canvas, ctx;
         let nodePositions = new Map();
-        const NODE_W = 140,
-            NODE_H = 50;
+        const NODE_W = 150,
+            NODE_H = 60;
         const LVL_GAP = 60,
             NODE_GAP = 18;
 
@@ -672,6 +676,9 @@
             return posMap;
         }
 
+        // ============================================================
+        // 4. ОТРИСОВКА С КНОПКАМИ НА КАРТОЧКАХ
+        // ============================================================
         function render() {
             const dpr = window.devicePixelRatio || 1;
             const w = canvas.width / dpr;
@@ -732,6 +739,7 @@
 
                 ctx.globalAlpha = isDim ? 0.2 : 1;
 
+                // Фон карточки
                 ctx.fillStyle = isHighlight ? '#eff6ff' : '#ffffff';
                 ctx.strokeStyle = isHighlight ? '#2563eb' : '#dce3eb';
                 ctx.lineWidth = isHighlight ? 2 : 1.5;
@@ -740,45 +748,60 @@
                 ctx.shadowBlur = isHighlight ? 16 : 8;
                 ctx.shadowOffsetY = 2;
 
-                roundRect(ctx, x, y, NODE_W, NODE_H, 8);
+                roundRect(ctx, x, y, NODE_W, NODE_H, 10);
                 ctx.fill();
                 ctx.stroke();
 
                 ctx.shadowBlur = 0;
                 ctx.shadowOffsetY = 0;
 
+                // ============================================
+                // ИМЯ (если редактируем — показываем поле ввода)
+                // ============================================
                 if (isEditing && editMode) {
                     ctx.fillStyle = '#ffffff';
-                    roundRect(ctx, x + 8, y + 6, NODE_W - 16, NODE_H - 12, 4);
+                    roundRect(ctx, x + 10, y + 10, NODE_W - 20, NODE_H - 38, 6);
                     ctx.fill();
                     ctx.strokeStyle = '#2563eb';
-                    ctx.lineWidth = 1.5;
-                    roundRect(ctx, x + 8, y + 6, NODE_W - 16, NODE_H - 12, 4);
+                    ctx.lineWidth = 2;
+                    roundRect(ctx, x + 10, y + 10, NODE_W - 20, NODE_H - 38, 6);
                     ctx.stroke();
+
                     ctx.fillStyle = '#1a1a2e';
-                    ctx.font = '600 15px Inter, sans-serif';
+                    ctx.font = '600 16px Inter, sans-serif';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
-                    ctx.fillText('✎ ' + p.name, x + NODE_W / 2, y + NODE_H / 2);
+                    ctx.fillText('✎ ' + p.name, x + NODE_W / 2, y + NODE_H / 2 - 4);
                 } else {
                     ctx.fillStyle = '#1a1a2e';
-                    ctx.font = '600 15px Inter, sans-serif';
+                    ctx.font = '600 16px Inter, sans-serif';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
-                    ctx.fillText(p.name, x + NODE_W / 2, y + NODE_H / 2 - 4);
+                    ctx.fillText(p.name, x + NODE_W / 2, y + NODE_H / 2 - 6);
 
+                    // Семья (мелко снизу)
                     ctx.fillStyle = '#6b7a8f';
                     ctx.font = '11px Inter, sans-serif';
-                    ctx.fontWeight = '400';
                     ctx.fillText(p.family, x + NODE_W / 2, y + NODE_H / 2 + 16);
                 }
 
+                // ============================================
+                // КНОПКИ (только в админ-режиме)
+                // ============================================
                 if (editMode) {
+                    // ✏️ Карандаш — правый верхний угол
+                    ctx.fillStyle = '#2563eb';
+                    ctx.font = '16px Inter, sans-serif';
+                    ctx.textAlign = 'right';
+                    ctx.textBaseline = 'top';
+                    ctx.fillText('✏️', x + NODE_W - 8, y + 4);
+
+                    // ➕ Плюс — внизу по центру
                     ctx.fillStyle = '#2563eb';
                     ctx.font = '18px Inter, sans-serif';
-                    ctx.textAlign = 'right';
+                    ctx.textAlign = 'center';
                     ctx.textBaseline = 'bottom';
-                    ctx.fillText('+', x + NODE_W - 8, y + NODE_H - 4);
+                    ctx.fillText('➕', x + NODE_W / 2, y + NODE_H - 4);
                 }
 
                 ctx.globalAlpha = 1;
@@ -802,7 +825,7 @@
         }
 
         // ============================================================
-        // 7. УПРАВЛЕНИЕ
+        // 5. УПРАВЛЕНИЕ (МЫШЬ + ТАЧ)
         // ============================================================
         function getCanvasCoords(e) {
             const rect = canvas.getBoundingClientRect();
@@ -907,7 +930,7 @@
         }
 
         // ============================================================
-        // 8. КЛИК
+        // 6. КЛИК — определяем, куда нажали (✏️, ➕ или имя)
         // ============================================================
         function onClick(e) {
             const rect = canvas.getBoundingClientRect();
@@ -936,6 +959,7 @@
             const tx = (mx - w / 2) / scale + cx - offsetX;
             const ty = (my - h / 2) / scale + cy - offsetY;
 
+            // Ищем, на какую карточку нажали
             let found = null;
             let minDist = 70;
             posMap.forEach((pos, id) => {
@@ -948,13 +972,45 @@
                 }
             });
 
-            if (found) {
-                const p = people.find(pp => pp.id === found);
-                if (!p) return;
+            if (!found) {
+                highlightIds.clear();
+                document.getElementById('tooltip').style.display = 'none';
+                render();
+                return;
+            }
 
-                if (editMode) {
-                    editingId = found;
-                    render();
+            const p = people.find(pp => pp.id === found);
+            if (!p) return;
+
+            // Если админ-режим включён
+            if (editMode) {
+                // Вычисляем относительные координаты внутри карточки
+                const pos = posMap.get(found);
+                const localX = (tx - pos.x) / NODE_W;
+                const localY = (ty - pos.y) / NODE_H;
+
+                // ➕ Плюсик внизу по центру (localY ~ 0.85-1.0, localX ~ 0.4-0.6)
+                if (localY > 0.75 && localX > 0.3 && localX < 0.7) {
+                    // Добавить сына
+                    const fatherId = p.id;
+                    const family = p.family;
+                    const newName = prompt('➕ Добавить сына для ' + p.name + '\n\nВведите имя:');
+                    if (newName && newName.trim() !== '') {
+                        const newId = 'p' + Date.now() + Math.random().toString(36).slice(2, 6);
+                        people.push({ id: newId, name: newName.trim(), family: family, fatherId: fatherId });
+                        saveToStorage();
+                        buildFamilyFilter();
+                        updateStats();
+                        populateSelects();
+                        centerView();
+                        render();
+                        alert('✅ ' + newName.trim() + ' добавлен!');
+                    }
+                    return;
+                }
+
+                // ✏️ Карандаш в правом верхнем углу (localX ~ 0.85-1.0, localY ~ 0.0-0.2)
+                if (localX > 0.8 && localY < 0.25) {
                     const newName = prompt('✏️ Редактирование\n\nИмя:', p.name);
                     if (newName !== null && newName.trim() !== '') {
                         p.name = newName.trim();
@@ -964,11 +1020,10 @@
                         render();
                         alert('✅ Имя обновлено!');
                     }
-                    editingId = null;
-                    render();
                     return;
                 }
 
+                // Если кликнули по самой карточке (не по кнопкам) — показываем тултип
                 showTooltip(e.clientX, e.clientY, p);
                 highlightIds.clear();
                 let cur = p;
@@ -978,15 +1033,23 @@
                     cur = father;
                 }
                 render();
-            } else {
-                highlightIds.clear();
-                document.getElementById('tooltip').style.display = 'none';
-                render();
+                return;
             }
+
+            // Обычный режим (не админ) — тултип и подсветка
+            showTooltip(e.clientX, e.clientY, p);
+            highlightIds.clear();
+            let cur = p;
+            while (cur) {
+                highlightIds.add(cur.id);
+                const father = people.find(pp => pp.id === cur.fatherId);
+                cur = father;
+            }
+            render();
         }
 
         // ============================================================
-        // 9. ТУЛТИП
+        // 7. ТУЛТИП
         // ============================================================
         let tooltipTimeout;
 
@@ -1020,7 +1083,7 @@
         }
 
         // ============================================================
-        // 10. ПОИСК И ФИЛЬТР
+        // 8. ПОИСК И ФИЛЬТР
         // ============================================================
         function searchByName(query) {
             highlightIds.clear();
@@ -1059,7 +1122,7 @@
         }
 
         // ============================================================
-        // 11. АДМИНКА
+        // 9. АДМИНКА
         // ============================================================
         function toggleAdmin() {
             const panel = document.getElementById('admin-panel');
@@ -1069,14 +1132,12 @@
 
             const btn = document.querySelector('.header-btn.admin');
             if (adminActive) {
-                btn.style.background = '#2563eb';
-                btn.style.borderColor = '#2563eb';
-                btn.style.color = '#ffffff';
+                btn.classList.add('active');
+                btn.textContent = 'Админ ✓';
                 populateSelects();
             } else {
-                btn.style.background = '#1a1a2e';
-                btn.style.borderColor = '#1a1a2e';
-                btn.style.color = '#ffffff';
+                btn.classList.remove('active');
+                btn.textContent = 'Админ';
                 editingId = null;
             }
             render();
@@ -1113,7 +1174,7 @@
         }
 
         // ============================================================
-        // 12. ХРАНЕНИЕ
+        // 10. ХРАНЕНИЕ
         // ============================================================
         function saveToStorage() {
             try { localStorage.setItem('dendro_people', JSON.stringify(people)); } catch (e) {}
@@ -1133,7 +1194,7 @@
         }
 
         // ============================================================
-        // 13. ВСПОМОГАТЕЛЬНЫЕ
+        // 11. ВСПОМОГАТЕЛЬНЫЕ
         // ============================================================
         function buildFamilyFilter() {
             const families = [...new Set(people.map(p => p.family))].sort();
