@@ -194,11 +194,6 @@
             font-weight: 500;
         }
 
-        /* Скрываем админ-панель — она не нужна */
-        #admin-panel {
-            display: none !important;
-        }
-
         #login-overlay {
             position: fixed;
             inset: 0;
@@ -395,8 +390,6 @@
         <div class="lineage" id="tipLineage">—</div>
     </div>
 
-    <!-- Админ-панель скрыта, всё через карточки -->
-
     <script>
         // ============================================================
         // 1. ДАННЫЕ
@@ -438,7 +431,6 @@
             NODE_GAP = 18;
 
         let editMode = false;
-        let editingId = null;
 
         // ============================================================
         // 3. ИНИЦИАЛИЗАЦИЯ
@@ -606,11 +598,9 @@
                 const isHighlight = highlightIds.has(p.id);
                 const isDim = dimFamily && p.family !== dimFamily;
                 const color = getFamilyColor(p.family);
-                const isEditing = (editingId === p.id);
 
                 ctx.globalAlpha = isDim ? 0.2 : 1;
 
-                // Фон
                 ctx.fillStyle = isHighlight ? '#eff6ff' : '#ffffff';
                 ctx.strokeStyle = isHighlight ? '#2563eb' : '#dce3eb';
                 ctx.lineWidth = isHighlight ? 2 : 1.5;
@@ -626,36 +616,17 @@
                 ctx.shadowBlur = 0;
                 ctx.shadowOffsetY = 0;
 
-                // ============================================
-                // ИМЯ (если редактируем — поле ввода прямо на карточке)
-                // ============================================
-                if (isEditing && editMode) {
-                    // Белая подложка под текст
-                    ctx.fillStyle = '#ffffff';
-                    roundRect(ctx, x + 10, y + 8, NODE_W - 20, NODE_H - 32, 6);
-                    ctx.fill();
-                    ctx.strokeStyle = '#2563eb';
-                    ctx.lineWidth = 2;
-                    roundRect(ctx, x + 10, y + 8, NODE_W - 20, NODE_H - 32, 6);
-                    ctx.stroke();
+                // Имя
+                ctx.fillStyle = '#1a1a2e';
+                ctx.font = '600 16px Inter, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(p.name, x + NODE_W / 2, y + NODE_H / 2 - 6);
 
-                    ctx.fillStyle = '#1a1a2e';
-                    ctx.font = '600 16px Inter, sans-serif';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillText('✎ ' + p.name, x + NODE_W / 2, y + NODE_H / 2 - 2);
-                } else {
-                    ctx.fillStyle = '#1a1a2e';
-                    ctx.font = '600 16px Inter, sans-serif';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillText(p.name, x + NODE_W / 2, y + NODE_H / 2 - 6);
-
-                    // Семья
-                    ctx.fillStyle = '#6b7a8f';
-                    ctx.font = '11px Inter, sans-serif';
-                    ctx.fillText(p.family, x + NODE_W / 2, y + NODE_H / 2 + 16);
-                }
+                // Семья
+                ctx.fillStyle = '#6b7a8f';
+                ctx.font = '11px Inter, sans-serif';
+                ctx.fillText(p.family, x + NODE_W / 2, y + NODE_H / 2 + 16);
 
                 // ============================================
                 // ✏️ и ➕ (только в админ-режиме)
@@ -663,14 +634,14 @@
                 if (editMode) {
                     // ✏️ Карандаш — правый верхний угол
                     ctx.fillStyle = '#2563eb';
-                    ctx.font = '16px Inter, sans-serif';
+                    ctx.font = '18px Inter, sans-serif';
                     ctx.textAlign = 'right';
                     ctx.textBaseline = 'top';
                     ctx.fillText('✏️', x + NODE_W - 8, y + 4);
 
                     // ➕ Плюс — внизу по центру
                     ctx.fillStyle = '#2563eb';
-                    ctx.font = '18px Inter, sans-serif';
+                    ctx.font = '20px Inter, sans-serif';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'bottom';
                     ctx.fillText('➕', x + NODE_W / 2, y + NODE_H - 4);
@@ -802,7 +773,7 @@
         }
 
         // ============================================================
-        // 6. КЛИК ПО КАРТОЧКЕ — ВСЁ ЧЕРЕЗ НЕЁ
+        // 6. КЛИК ПО КАРТОЧКЕ — ОБРАБОТКА ✏️ И ➕
         // ============================================================
         function onClick(e) {
             const rect = canvas.getBoundingClientRect();
@@ -845,9 +816,7 @@
             });
 
             if (!found) {
-                // Клик вне карточки — сброс
                 highlightIds.clear();
-                editingId = null;
                 document.getElementById('tooltip').style.display = 'none';
                 render();
                 return;
@@ -857,24 +826,25 @@
             if (!p) return;
 
             // ============================================
-            // АДМИН-РЕЖИМ: всё через карточку
+            // АДМИН-РЕЖИМ: обрабатываем ✏️ и ➕
             // ============================================
             if (editMode) {
                 const pos = posMap.get(found);
                 const localX = (tx - pos.x) / NODE_W;
                 const localY = (ty - pos.y) / NODE_H;
 
-                // ➕ Плюсик внизу по центру — добавить сына
+                // ➕ Плюсик внизу по центру (localX 0.35-0.65, localY 0.8-1.0)
                 if (localY > 0.75 && localX > 0.3 && localX < 0.7) {
-                    const newName = prompt('➕ Добавить сына для ' + p.name + '\n\nВведите имя:');
+                    const newName = prompt('➕ Добавить сына для "' + p.name + '"\n\nВведите имя:');
                     if (newName && newName.trim() !== '') {
                         const newId = 'p' + Date.now() + Math.random().toString(36).slice(2, 6);
-                        people.push({
+                        const newPerson = {
                             id: newId,
                             name: newName.trim(),
                             family: p.family,
                             fatherId: p.id
-                        });
+                        };
+                        people.push(newPerson);
                         saveToStorage();
                         buildFamilyFilter();
                         updateStats();
@@ -885,74 +855,78 @@
                     return;
                 }
 
-                // ✏️ Карандаш в правом верхнем углу — редактировать имя
-                if (localX > 0.8 && localY < 0.25) {
-                    // Включаем режим редактирования прямо на карточке
-                    editingId = p.id;
-                    render();
-
-                    // Создаём невидимое поле ввода поверх канваса
+                // ✏️ Карандаш в правом верхнем углу (localX 0.8-1.0, localY 0.0-0.25)
+                if (localX > 0.78 && localY < 0.25) {
+                    // Создаём поле ввода прямо на карточке
                     const input = document.createElement('input');
                     input.type = 'text';
                     input.value = p.name;
                     input.style.position = 'fixed';
-                    input.style.left = (e.clientX - 60) + 'px';
+                    input.style.left = (e.clientX - 70) + 'px';
                     input.style.top = (e.clientY - 20) + 'px';
-                    input.style.width = '120px';
-                    input.style.padding = '8px 12px';
+                    input.style.width = '140px';
+                    input.style.padding = '10px 14px';
                     input.style.border = '2px solid #2563eb';
-                    input.style.borderRadius = '8px';
+                    input.style.borderRadius = '10px';
                     input.style.background = '#ffffff';
                     input.style.color = '#1a1a2e';
                     input.style.fontFamily = 'Inter, sans-serif';
                     input.style.fontSize = '16px';
                     input.style.fontWeight = '600';
                     input.style.outline = 'none';
-                    input.style.boxShadow = '0 4px 16px rgba(0,0,0,0.12)';
+                    input.style.boxShadow = '0 8px 30px rgba(0,0,0,0.15)';
                     input.style.zIndex = '300';
                     input.autofocus = true;
                     input.select();
 
                     document.body.appendChild(input);
 
-                    input.addEventListener('blur', () => {
+                    const saveEdit = () => {
                         const val = input.value.trim();
                         if (val && val !== '') {
                             p.name = val;
                             saveToStorage();
                             buildFamilyFilter();
                             updateStats();
+                            render();
+                            alert('✅ Имя обновлено на "' + val + '"');
+                        } else {
+                            render();
                         }
-                        editingId = null;
-                        document.body.removeChild(input);
-                        render();
-                    });
+                        if (document.body.contains(input)) {
+                            document.body.removeChild(input);
+                        }
+                    };
+
+                    input.addEventListener('blur', saveEdit);
 
                     input.addEventListener('keydown', (ev) => {
                         if (ev.key === 'Enter') {
-                            input.blur();
+                            saveEdit();
                         }
                         if (ev.key === 'Escape') {
-                            editingId = null;
-                            document.body.removeChild(input);
+                            if (document.body.contains(input)) {
+                                document.body.removeChild(input);
+                            }
                             render();
                         }
                     });
 
                     // Закрываем по клику вне
                     setTimeout(() => {
-                        document.addEventListener('click', function closeHandler(ev2) {
+                        const closeHandler = (ev2) => {
                             if (ev2.target !== input) {
-                                input.blur();
+                                saveEdit();
                                 document.removeEventListener('click', closeHandler);
                             }
-                        });
+                        };
+                        document.addEventListener('click', closeHandler);
                     }, 100);
 
                     return;
                 }
 
-                // Если кликнули по телу карточки (не по кнопкам) — показываем тултип
+                // Если кликнули по телу карточки (не по кнопкам) — тултип
                 showTooltip(e.clientX, e.clientY, p);
                 highlightIds.clear();
                 let cur = p;
@@ -966,7 +940,7 @@
             }
 
             // ============================================
-            // ОБЫЧНЫЙ РЕЖИМ (не админ) — тултип
+            // ОБЫЧНЫЙ РЕЖИМ — тултип
             // ============================================
             showTooltip(e.clientX, e.clientY, p);
             highlightIds.clear();
@@ -1019,7 +993,6 @@
         function searchByName(query) {
             highlightIds.clear();
             dimFamily = null;
-            editingId = null;
             if (!query.trim()) { render(); return; }
             const q = query.trim().toLowerCase();
             people.forEach(p => {
@@ -1040,14 +1013,12 @@
         function filterByFamily(family) {
             dimFamily = family || null;
             highlightIds.clear();
-            editingId = null;
             render();
         }
 
         function resetView() {
             highlightIds.clear();
             dimFamily = null;
-            editingId = null;
             document.getElementById('searchInput').value = '';
             document.getElementById('familyFilter').value = '';
             centerView();
@@ -1056,7 +1027,7 @@
         }
 
         // ============================================================
-        // 9. АДМИН-РЕЖИМ (вкл/выкл)
+        // 9. АДМИН-РЕЖИМ
         // ============================================================
         function toggleAdmin() {
             editMode = !editMode;
@@ -1067,7 +1038,6 @@
             } else {
                 btn.classList.remove('active');
                 btn.textContent = 'Админ';
-                editingId = null;
             }
             render();
         }
