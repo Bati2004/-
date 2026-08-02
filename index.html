@@ -321,7 +321,7 @@
 
     <div id="header">
         <h1>Хьачарой <span>· тейп</span></h1>
-        <input type="text" id="searchInput" placeholder="🔍 Поиск по имени или фамилии..." oninput="searchByName(this.value)">
+        <input type="text" id="searchInput" placeholder="Поиск по имени или фамилии..." oninput="searchByName(this.value)">
         <select id="familyFilter" onchange="filterByFamily(this.value)">
             <option value="">Все семьи</option>
         </select>
@@ -342,13 +342,12 @@
 
     <script>
         // ============================================================
-        // 1. ДАННЫЕ — фамилия может быть пустой!
+        // ДАННЫЕ
         // ============================================================
         let people = [
             { id: 'root1', name: 'Корень', family: '', fatherId: null }
         ];
 
-        // Цвета для семей (если фамилия есть)
         const familyColors = {};
 
         function getFamilyColor(family) {
@@ -361,7 +360,7 @@
         }
 
         // ============================================================
-        // 2. СОСТОЯНИЕ
+        // СОСТОЯНИЕ
         // ============================================================
         let highlightIds = new Set();
         let dimFamily = null;
@@ -372,13 +371,13 @@
         let dragStartOffX = 0, dragStartOffY = 0;
         let canvas, ctx;
         let nodePositions = new Map();
-        const NODE_W = 150, NODE_H = 60;
-        const LVL_GAP = 60, NODE_GAP = 18;
+        const NODE_W = 170, NODE_H = 70;
+        const LVL_GAP = 60, NODE_GAP = 20;
 
         let editMode = false;
 
         // ============================================================
-        // 3. ИНИЦИАЛИЗАЦИЯ
+        // ИНИЦИАЛИЗАЦИЯ
         // ============================================================
         function init() {
             canvas = document.getElementById('treeCanvas');
@@ -480,7 +479,7 @@
         }
 
         // ============================================================
-        // 4. ОТРИСОВКА
+        // ОТРИСОВКА
         // ============================================================
         function render() {
             const dpr = window.devicePixelRatio || 1;
@@ -568,19 +567,21 @@
                     ctx.fillText(p.name, x + NODE_W / 2, y + NODE_H / 2);
                 }
 
-                // ✏️ и ➕ (только в админ-режиме)
+                // Кнопки в админ-режиме
                 if (editMode) {
+                    // Кнопка "Изменить" — справа сверху
                     ctx.fillStyle = '#2563eb';
-                    ctx.font = '18px Inter, sans-serif';
+                    ctx.font = '10px Inter, sans-serif';
                     ctx.textAlign = 'right';
                     ctx.textBaseline = 'top';
-                    ctx.fillText('✏️', x + NODE_W - 8, y + 4);
+                    ctx.fillText('✎ Изменить', x + NODE_W - 8, y + 4);
 
-                    ctx.fillStyle = '#2563eb';
-                    ctx.font = '20px Inter, sans-serif';
+                    // Кнопка "Добавить" — снизу по центру
+                    ctx.fillStyle = '#059669';
+                    ctx.font = '10px Inter, sans-serif';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'bottom';
-                    ctx.fillText('➕', x + NODE_W / 2, y + NODE_H - 4);
+                    ctx.fillText('＋ Добавить', x + NODE_W / 2, y + NODE_H - 4);
                 }
 
                 ctx.globalAlpha = 1;
@@ -604,7 +605,7 @@
         }
 
         // ============================================================
-        // 5. УПРАВЛЕНИЕ (МЫШЬ + ТАЧ)
+        // УПРАВЛЕНИЕ
         // ============================================================
         function getCanvasCoords(e) {
             const rect = canvas.getBoundingClientRect();
@@ -707,7 +708,7 @@
         }
 
         // ============================================================
-        // 6. КЛИК — ОБРАБОТКА ✏️ И ➕
+        // КЛИК
         // ============================================================
         function onClick(e) {
             const rect = canvas.getBoundingClientRect();
@@ -756,17 +757,15 @@
             const p = people.find(pp => pp.id === found);
             if (!p) return;
 
-            // ============================================
-            // АДМИН-РЕЖИМ
-            // ============================================
+            // Если админ-режим включён
             if (editMode) {
                 const pos = posMap.get(found);
                 const localX = (tx - pos.x) / NODE_W;
                 const localY = (ty - pos.y) / NODE_H;
 
-                // ➕ Плюсик — добавить сына
-                if (localY > 0.75 && localX > 0.3 && localX < 0.7) {
-                    const newName = prompt('➕ Добавить сына для "' + p.name + '"\n\nВведите имя:');
+                // Кнопка "Добавить" — снизу по центру (localY ~ 0.85-1.0)
+                if (localY > 0.8 && localX > 0.3 && localX < 0.7) {
+                    const newName = prompt('Добавить сына для "' + p.name + '"\n\nВведите имя:');
                     if (newName && newName.trim() !== '') {
                         const newId = 'p' + Date.now() + Math.random().toString(36).slice(2, 6);
                         people.push({
@@ -785,13 +784,13 @@
                     return;
                 }
 
-                // ✏️ Карандаш — редактировать
-                if (localX > 0.78 && localY < 0.25) {
-                    const newName = prompt('✏️ Редактирование\n\nИмя:', p.name);
+                // Кнопка "Изменить" — справа сверху (localX ~ 0.8-1.0, localY ~ 0.0-0.2)
+                if (localX > 0.7 && localY < 0.25) {
+                    const newName = prompt('Редактирование\n\nИмя:', p.name);
                     if (newName !== null && newName.trim() !== '') {
                         p.name = newName.trim();
                     }
-                    const newFamily = prompt('✏️ Фамилия (семья)\n\nЕсли фамилии нет — оставь пустым:', p.family);
+                    const newFamily = prompt('Фамилия (семья)\n\nЕсли фамилии нет — оставь пустым:', p.family);
                     if (newFamily !== null) {
                         p.family = newFamily.trim();
                     }
@@ -803,7 +802,7 @@
                     return;
                 }
 
-                // Клик по телу карточки — тултип
+                // Клик по карточке (не по кнопкам) — тултип
                 showTooltip(e.clientX, e.clientY, p);
                 highlightIds.clear();
                 let cur = p;
@@ -816,9 +815,7 @@
                 return;
             }
 
-            // ============================================
-            // ОБЫЧНЫЙ РЕЖИМ — тултип
-            // ============================================
+            // Обычный режим — тултип
             showTooltip(e.clientX, e.clientY, p);
             highlightIds.clear();
             let cur = p;
@@ -831,7 +828,7 @@
         }
 
         // ============================================================
-        // 7. ТУЛТИП
+        // ТУЛТИП
         // ============================================================
         let tooltipTimeout;
 
@@ -865,7 +862,7 @@
         }
 
         // ============================================================
-        // 8. ПОИСК И ФИЛЬТР
+        // ПОИСК, ФИЛЬТР, АДМИН
         // ============================================================
         function searchByName(query) {
             highlightIds.clear();
@@ -905,9 +902,6 @@
             document.getElementById('tooltip').style.display = 'none';
         }
 
-        // ============================================================
-        // 9. АДМИН-РЕЖИМ
-        // ============================================================
         function toggleAdmin() {
             editMode = !editMode;
             const btn = document.querySelector('.header-btn.admin');
@@ -922,7 +916,7 @@
         }
 
         // ============================================================
-        // 10. ХРАНЕНИЕ
+        // ХРАНЕНИЕ И ВСПОМОГАТЕЛЬНЫЕ
         // ============================================================
         function saveToStorage() {
             try { localStorage.setItem('dendro_people', JSON.stringify(people)); } catch (e) {}
@@ -941,9 +935,6 @@
             } catch (e) {}
         }
 
-        // ============================================================
-        // 11. ВСПОМОГАТЕЛЬНЫЕ
-        // ============================================================
         function buildFamilyFilter() {
             const families = [...new Set(people.map(p => p.family).filter(f => f && f !== ''))].sort();
             const sel = document.getElementById('familyFilter');
