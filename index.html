@@ -34,7 +34,6 @@
             align-items: center;
             gap: 10px;
             border-bottom: 1px solid #d0d7de;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
         }
         #header h1 {
             font-size: 18px;
@@ -442,21 +441,6 @@
                     ctx.fillText(p.name, x + NODE_W / 2, y + NODE_H / 2);
                 }
 
-                // Кнопки в админ-режиме
-                if (editMode) {
-                    ctx.fillStyle = '#2563eb';
-                    ctx.font = '10px Arial, sans-serif';
-                    ctx.textAlign = 'right';
-                    ctx.textBaseline = 'top';
-                    ctx.fillText('✎ Изменить', x + NODE_W - 6, y + 4);
-
-                    ctx.fillStyle = '#059669';
-                    ctx.font = '10px Arial, sans-serif';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'bottom';
-                    ctx.fillText('＋ Добавить', x + NODE_W / 2, y + NODE_H - 4);
-                }
-
                 ctx.globalAlpha = 1;
             });
 
@@ -581,7 +565,7 @@
         }
 
         // ============================================================
-        // КЛИК
+        // КЛИК - ГЛАВНАЯ ЛОГИКА
         // ============================================================
         function onClick(e) {
             const rect = canvas.getBoundingClientRect();
@@ -607,6 +591,7 @@
             const tx = (mx - w / 2) / scale + cx - offsetX;
             const ty = (my - h / 2) / scale + cy - offsetY;
 
+            // Находим, на какую карточку нажали
             let found = null;
             let minDist = 60;
             posMap.forEach((pos, id) => {
@@ -628,14 +613,35 @@
             const p = people.find(pp => pp.id === found);
             if (!p) return;
 
+            // ============================================
+            // ЕСЛИ ВКЛЮЧЁН АДМИН-РЕЖИМ
+            // ============================================
             if (editMode) {
-                const pos = posMap.get(found);
-                const localX = (tx - pos.x) / NODE_W;
-                const localY = (ty - pos.y) / NODE_H;
+                // Показываем меню с двумя вариантами
+                const choice = confirm(
+                    '👤 ' + p.name + (p.family ? ' (' + p.family + ')' : '') + '\n\n' +
+                    'Нажмите "ОК" — чтобы ИЗМЕНИТЬ имя или фамилию\n' +
+                    'Нажмите "Отмена" — чтобы ДОБАВИТЬ сына'
+                );
 
-                // Кнопка "Добавить"
-                if (localY > 0.8 && localX > 0.3 && localX < 0.7) {
-                    const newName = prompt('Добавить сына для "' + p.name + '"\n\nИмя:');
+                if (choice) {
+                    // ИЗМЕНИТЬ
+                    const newName = prompt('✏️ Редактирование\n\nИмя:', p.name);
+                    if (newName !== null && newName.trim() !== '') {
+                        p.name = newName.trim();
+                    }
+                    const newFamily = prompt('✏️ Редактирование\n\nФамилия (если нет — оставь пустым):', p.family);
+                    if (newFamily !== null) {
+                        p.family = newFamily.trim();
+                    }
+                    saveToStorage();
+                    buildFamilyFilter();
+                    updateStats();
+                    render();
+                    alert('✅ Обновлено!');
+                } else {
+                    // ДОБАВИТЬ СЫНА
+                    const newName = prompt('➕ Добавить сына для "' + p.name + '"\n\nВведите имя:');
                     if (newName && newName.trim() !== '') {
                         const newId = 'p' + Date.now() + Math.random().toString(36).slice(2, 6);
                         people.push({
@@ -651,40 +657,13 @@
                         render();
                         alert('✅ ' + newName.trim() + ' добавлен!');
                     }
-                    return;
                 }
-
-                // Кнопка "Изменить"
-                if (localX > 0.7 && localY < 0.25) {
-                    const newName = prompt('Редактирование\n\nИмя:', p.name);
-                    if (newName !== null && newName.trim() !== '') {
-                        p.name = newName.trim();
-                    }
-                    const newFamily = prompt('Фамилия:', p.family);
-                    if (newFamily !== null) {
-                        p.family = newFamily.trim();
-                    }
-                    saveToStorage();
-                    buildFamilyFilter();
-                    updateStats();
-                    render();
-                    alert('✅ Обновлено!');
-                    return;
-                }
-
-                // Обычный клик по карточке
-                highlightIds.clear();
-                let cur = p;
-                while (cur) {
-                    highlightIds.add(cur.id);
-                    const father = people.find(pp => pp.id === cur.fatherId);
-                    cur = father;
-                }
-                render();
                 return;
             }
 
-            // Обычный режим
+            // ============================================
+            // ОБЫЧНЫЙ РЕЖИМ — подсветка предков
+            // ============================================
             highlightIds.clear();
             let cur = p;
             while (cur) {
