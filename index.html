@@ -2,268 +2,594 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Генеалогическое древо тейпа Хачиро</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Древо тейпа Хачиро</title>
+    <!-- Подключаем красивые шрифты -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            user-select: none;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
         }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0a0808;
-            color: #e0d5c0;
+            font-family: 'Cormorant Garamond', 'Georgia', 'Times New Roman', serif;
+            background: #0a0806;
             overflow: hidden;
             height: 100vh;
+            position: fixed;
+            width: 100%;
+            touch-action: none;
         }
+
+        /* Эффект старого пергамента */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse at 20% 30%, rgba(80, 55, 30, 0.25) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 70%, rgba(60, 40, 20, 0.2) 0%, transparent 50%),
+                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(40, 30, 20, 0.08) 2px, rgba(40, 30, 20, 0.08) 4px);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Шапка с восточным стилем */
         #header {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             z-index: 100;
-            background: rgba(10, 8, 8, 0.92);
-            padding: 12px 24px;
+            background: linear-gradient(180deg, rgba(10, 8, 6, 0.98) 0%, rgba(10, 8, 6, 0.92) 100%);
+            padding: 12px 20px;
             display: flex;
             flex-wrap: wrap;
             align-items: center;
-            gap: 12px;
-            border-bottom: 1px solid #b8860b;
-            backdrop-filter: blur(8px);
+            gap: 10px;
+            border-bottom: 2px solid #b8860b;
+            box-shadow: 0 4px 40px rgba(0, 0, 0, 0.9), inset 0 0 60px rgba(40, 30, 15, 0.05);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
         }
         #header h1 {
-            font-size: 20px;
-            letter-spacing: 2px;
+            font-family: 'Playfair Display', 'Georgia', serif;
+            font-size: 22px;
+            font-weight: 700;
+            font-style: italic;
             color: #d4a843;
-            margin-right: 20px;
-            font-weight: 300;
+            text-shadow: 0 0 40px rgba(212, 168, 67, 0.12), 0 2px 4px rgba(0, 0, 0, 0.5);
+            letter-spacing: 5px;
+            margin-right: 14px;
+            white-space: nowrap;
+            position: relative;
         }
-        #header input,
-        #header select,
-        #header button {
-            padding: 8px 14px;
-            border-radius: 6px;
-            border: 1px solid #5a4a2a;
-            background: #1a150e;
-            color: #e0d5c0;
+        #header h1::after {
+            content: '✦';
+            font-style: normal;
             font-size: 14px;
-            outline: none;
-            transition: 0.3s;
-        }
-        #header input:focus,
-        #header select:focus {
-            border-color: #d4a843;
-            box-shadow: 0 0 12px rgba(212, 168, 67, 0.2);
-        }
-        #header input::placeholder {
             color: #6a5a3a;
-        }
-        #header button {
-            background: #2a1f0e;
-            cursor: pointer;
-            border-color: #b8860b;
-        }
-        #header button:hover {
-            background: #3d2d14;
-        }
-        .admin-btn {
-            margin-left: auto;
-            background: #3d1a0a !important;
-            border-color: #8b3a1a !important;
-        }
-        #stats {
-            color: #8a7a5a;
-            font-size: 13px;
             margin-left: 10px;
         }
+        #header h1 span {
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 400;
+            font-style: italic;
+            color: #7a6a4a;
+            font-size: 14px;
+            letter-spacing: 3px;
+        }
+        #searchInput {
+            flex: 1;
+            min-width: 130px;
+            padding: 8px 18px;
+            border-radius: 30px;
+            border: 1px solid #3a2a1a;
+            background: rgba(20, 15, 10, 0.85);
+            color: #e8ddd0;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 16px;
+            font-style: italic;
+            outline: none;
+            transition: all 0.4s;
+            letter-spacing: 0.5px;
+        }
+        #searchInput:focus {
+            border-color: #d4a843;
+            box-shadow: 0 0 30px rgba(212, 168, 67, 0.08);
+            background: rgba(25, 18, 12, 0.95);
+        }
+        #searchInput::placeholder {
+            color: #5a4a3a;
+            font-style: italic;
+            letter-spacing: 1px;
+        }
+        #familyFilter {
+            padding: 8px 16px;
+            border-radius: 30px;
+            border: 1px solid #3a2a1a;
+            background: rgba(20, 15, 10, 0.85);
+            color: #e8ddd0;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 15px;
+            font-style: italic;
+            outline: none;
+            cursor: pointer;
+            max-width: 150px;
+            transition: 0.3s;
+            letter-spacing: 0.5px;
+        }
+        #familyFilter:focus {
+            border-color: #d4a843;
+        }
+        #familyFilter option {
+            background: #1a150e;
+            font-style: normal;
+        }
+        .header-btn {
+            padding: 8px 18px;
+            border-radius: 30px;
+            border: 1px solid #4a3a2a;
+            background: rgba(30, 20, 10, 0.6);
+            color: #aa9a7a;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 15px;
+            font-style: italic;
+            cursor: pointer;
+            transition: all 0.3s;
+            letter-spacing: 1px;
+            white-space: nowrap;
+        }
+        .header-btn:hover {
+            background: rgba(50, 35, 20, 0.8);
+            border-color: #b8860b;
+            color: #d4a843;
+            transform: scale(1.03);
+            box-shadow: 0 0 25px rgba(212, 168, 67, 0.05);
+        }
+        .header-btn.admin {
+            border-color: #6a2a1a;
+            color: #8a5a3a;
+            font-style: normal;
+        }
+        .header-btn.admin:hover {
+            border-color: #aa3a1a;
+            color: #d46a3a;
+            box-shadow: 0 0 30px rgba(180, 50, 20, 0.08);
+        }
+        #stats {
+            color: #5a4a3a;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 14px;
+            font-style: italic;
+            white-space: nowrap;
+            margin-left: 4px;
+            letter-spacing: 1px;
+        }
+
+        /* Канвас */
         #canvas-wrapper {
             position: fixed;
-            top: 80px;
+            top: 72px;
             left: 0;
             right: 0;
             bottom: 0;
+            z-index: 1;
+            touch-action: none;
         }
         #treeCanvas {
             width: 100%;
             height: 100%;
             display: block;
+            touch-action: none;
             cursor: grab;
         }
         #treeCanvas:active {
             cursor: grabbing;
         }
+
+        /* Тултип с восточным стилем */
         #tooltip {
             position: fixed;
             display: none;
-            background: rgba(20, 15, 10, 0.95);
+            background: rgba(12, 10, 8, 0.98);
             border: 1px solid #b8860b;
-            border-radius: 10px;
-            padding: 14px 20px;
-            min-width: 180px;
+            border-radius: 16px;
+            padding: 20px 28px;
+            min-width: 240px;
             pointer-events: none;
             z-index: 200;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(6px);
+            box-shadow: 0 8px 60px rgba(0, 0, 0, 0.95), inset 0 0 60px rgba(60, 40, 20, 0.04);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            animation: tooltipIn 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        @keyframes tooltipIn {
+            0% {
+                opacity: 0;
+                transform: translateY(-12px) scale(0.96);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
         }
         #tooltip .name {
-            font-size: 20px;
+            font-family: 'Playfair Display', 'Georgia', serif;
+            font-size: 26px;
+            font-weight: 700;
+            font-style: italic;
             color: #d4a843;
-            font-weight: 600;
+            letter-spacing: 2px;
+            text-shadow: 0 0 30px rgba(212, 168, 67, 0.06);
         }
         #tooltip .family {
-            font-size: 14px;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 16px;
+            font-style: italic;
             color: #aa9a7a;
-            margin-top: 4px;
+            margin-top: 2px;
+            letter-spacing: 1px;
+        }
+        #tooltip .family::before {
+            content: '◈ ';
+            color: #5a4a3a;
+            font-style: normal;
         }
         #tooltip .lineage {
-            font-size: 12px;
-            color: #8a7a5a;
-            margin-top: 6px;
-            border-top: 1px solid #3a2a1a;
-            padding-top: 6px;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 13px;
+            color: #6a5a4a;
+            margin-top: 10px;
+            border-top: 1px solid #2a1f0e;
+            padding-top: 10px;
+            font-style: italic;
+            letter-spacing: 0.5px;
         }
+        #tooltip .lineage span {
+            color: #aa8a5a;
+            font-style: normal;
+            font-weight: 600;
+        }
+
+        /* Админ-панель */
         #admin-panel {
             position: fixed;
-            bottom: 30px;
-            right: 30px;
+            bottom: 20px;
+            right: 20px;
             z-index: 150;
             display: none;
-            background: rgba(10, 8, 8, 0.96);
+            background: rgba(10, 8, 6, 0.99);
             border: 1px solid #b8860b;
-            border-radius: 14px;
-            padding: 24px;
-            min-width: 300px;
-            backdrop-filter: blur(12px);
-            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.9);
+            border-radius: 18px;
+            padding: 26px 30px;
+            min-width: 320px;
+            max-width: 92vw;
+            max-height: 80vh;
+            overflow-y: auto;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: 0 8px 70px rgba(0, 0, 0, 0.98), inset 0 0 60px rgba(40, 30, 15, 0.03);
+            animation: panelIn 0.3s ease-out;
+        }
+        @keyframes panelIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.95) translateY(10px);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
         }
         #admin-panel.active {
             display: block;
         }
+        #admin-panel::-webkit-scrollbar {
+            width: 4px;
+        }
+        #admin-panel::-webkit-scrollbar-track {
+            background: #0d0a08;
+        }
+        #admin-panel::-webkit-scrollbar-thumb {
+            background: #5a4a2a;
+            border-radius: 2px;
+        }
         #admin-panel h3 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            font-style: italic;
             color: #d4a843;
-            margin-bottom: 16px;
-            font-weight: 300;
-            letter-spacing: 1px;
+            font-size: 20px;
+            letter-spacing: 2px;
+            margin-bottom: 18px;
+            border-bottom: 1px solid #2a1f0e;
+            padding-bottom: 12px;
         }
         #admin-panel label {
             display: block;
-            margin: 10px 0 4px;
-            color: #aa9a7a;
+            margin: 14px 0 4px;
+            color: #8a7a5a;
+            font-family: 'Cormorant Garamond', serif;
             font-size: 13px;
+            font-style: italic;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
         }
         #admin-panel select,
         #admin-panel input {
             width: 100%;
-            padding: 8px;
-            border-radius: 6px;
-            border: 1px solid #3a2a1a;
-            background: #1a150e;
-            color: #e0d5c0;
-            font-size: 14px;
-        }
-        #admin-panel button {
-            margin-top: 14px;
-            width: 100%;
-            padding: 10px;
-            background: #2a1f0e;
-            border: 1px solid #b8860b;
-            border-radius: 6px;
-            color: #d4a843;
+            padding: 10px 16px;
+            border-radius: 10px;
+            border: 1px solid #2a1f0e;
+            background: #14100a;
+            color: #e8ddd0;
+            font-family: 'Cormorant Garamond', serif;
             font-size: 16px;
-            cursor: pointer;
+            font-style: italic;
+            outline: none;
             transition: 0.3s;
         }
-        #admin-panel button:hover {
-            background: #3d2d14;
+        #admin-panel select:focus,
+        #admin-panel input:focus {
+            border-color: #b8860b;
+            box-shadow: 0 0 20px rgba(212, 168, 67, 0.04);
+        }
+        #admin-panel select option {
+            font-style: normal;
+            background: #14100a;
+        }
+        .admin-btn-submit {
+            margin-top: 18px;
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #2a1f0e, #1a150e);
+            border: 1px solid #b8860b;
+            border-radius: 10px;
+            color: #d4a843;
+            font-family: 'Playfair Display', serif;
+            font-size: 17px;
+            font-style: italic;
+            cursor: pointer;
+            transition: all 0.3s;
+            letter-spacing: 2px;
+        }
+        .admin-btn-submit:hover {
+            background: linear-gradient(135deg, #3a2f1e, #2a1f0e);
+            box-shadow: 0 0 40px rgba(212, 168, 67, 0.06);
+            transform: scale(1.01);
         }
         .close-admin {
             position: absolute;
-            top: 10px;
-            right: 16px;
+            top: 14px;
+            right: 20px;
             background: none;
             border: none;
-            color: #8a5a3a;
-            font-size: 24px;
+            color: #5a3a2a;
+            font-size: 30px;
             cursor: pointer;
+            transition: all 0.3s;
+            font-family: serif;
+            line-height: 1;
         }
+        .close-admin:hover {
+            color: #8a5a3a;
+            transform: rotate(90deg);
+        }
+        .admin-divider {
+            border: none;
+            border-top: 1px solid #1a150e;
+            margin: 20px 0;
+        }
+        .admin-note {
+            color: #4a3a2a;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 12px;
+            font-style: italic;
+            margin-top: 10px;
+            text-align: center;
+            letter-spacing: 0.5px;
+        }
+
+        /* Логин */
         #login-overlay {
             position: fixed;
             inset: 0;
             z-index: 500;
-            background: rgba(0, 0, 0, 0.85);
+            background: rgba(0, 0, 0, 0.94);
             display: flex;
             align-items: center;
             justify-content: center;
-            backdrop-filter: blur(8px);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
         }
         #login-overlay.hidden {
             display: none;
         }
         #login-box {
-            background: rgba(20, 15, 10, 0.96);
+            background: radial-gradient(ellipse at center, rgba(25, 18, 12, 0.98), rgba(8, 6, 4, 0.98));
             border: 1px solid #b8860b;
-            border-radius: 16px;
-            padding: 40px;
-            min-width: 320px;
+            border-radius: 24px;
+            padding: 50px 44px;
+            min-width: 360px;
+            max-width: 92vw;
             text-align: center;
-            box-shadow: 0 8px 60px rgba(0, 0, 0, 0.9);
+            box-shadow: 0 8px 100px rgba(0, 0, 0, 0.9), inset 0 0 80px rgba(60, 40, 20, 0.03);
+            animation: loginIn 0.6s ease-out;
+        }
+        @keyframes loginIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.94) translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        #login-box .logo {
+            font-size: 54px;
+            margin-bottom: 4px;
+            display: block;
         }
         #login-box h2 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            font-style: italic;
             color: #d4a843;
-            font-weight: 300;
-            letter-spacing: 2px;
-            margin-bottom: 24px;
+            font-size: 34px;
+            letter-spacing: 8px;
+            text-shadow: 0 0 50px rgba(212, 168, 67, 0.06);
+        }
+        #login-box .sub {
+            font-family: 'Cormorant Garamond', serif;
+            color: #5a4a3a;
+            font-size: 15px;
+            font-style: italic;
+            letter-spacing: 8px;
+            margin-bottom: 30px;
+            margin-top: 2px;
         }
         #login-box input {
             width: 100%;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid #3a2a1a;
-            background: #1a150e;
-            color: #e0d5c0;
-            font-size: 16px;
-            margin-bottom: 16px;
+            padding: 14px 20px;
+            border-radius: 12px;
+            border: 1px solid #2a1f0e;
+            background: rgba(20, 15, 10, 0.9);
+            color: #e8ddd0;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 20px;
+            font-style: italic;
+            margin-bottom: 18px;
+            outline: none;
+            text-align: center;
+            letter-spacing: 6px;
+            transition: 0.3s;
+        }
+        #login-box input:focus {
+            border-color: #b8860b;
+            box-shadow: 0 0 40px rgba(212, 168, 67, 0.04);
         }
         #login-box button {
             width: 100%;
-            padding: 12px;
-            background: #2a1f0e;
+            padding: 14px;
+            background: linear-gradient(135deg, #2a1f0e, #1a150e);
             border: 1px solid #b8860b;
-            border-radius: 8px;
+            border-radius: 12px;
             color: #d4a843;
-            font-size: 18px;
+            font-family: 'Playfair Display', serif;
+            font-size: 20px;
+            font-style: italic;
             cursor: pointer;
-            transition: 0.3s;
+            transition: all 0.3s;
+            letter-spacing: 4px;
         }
         #login-box button:hover {
-            background: #3d2d14;
+            background: linear-gradient(135deg, #3a2f1e, #2a1f0e);
+            box-shadow: 0 0 60px rgba(212, 168, 67, 0.04);
+            transform: scale(1.01);
         }
         #login-error {
-            color: #b84a3a;
-            margin-top: 12px;
-            font-size: 14px;
+            color: #8a3a2a;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 15px;
+            font-style: italic;
+            margin-top: 16px;
             display: none;
+            letter-spacing: 1px;
         }
+
+        /* Адаптация */
         @media (max-width: 768px) {
-            #header h1 {
-                font-size: 16px;
-                margin-right: 10px;
+            #header {
+                padding: 8px 12px;
+                gap: 6px;
             }
-            #header input,
-            #header select {
-                width: 100%;
+            #header h1 {
+                font-size: 17px;
+                letter-spacing: 3px;
+            }
+            #header h1::after {
+                display: none;
+            }
+            #header h1 span {
+                font-size: 12px;
+            }
+            #searchInput {
+                font-size: 14px;
+                min-width: 80px;
+                padding: 6px 14px;
+            }
+            #familyFilter {
+                font-size: 13px;
+                max-width: 110px;
+                padding: 6px 12px;
+            }
+            .header-btn {
+                font-size: 13px;
+                padding: 6px 12px;
+            }
+            #stats {
+                font-size: 12px;
             }
             #admin-panel {
                 bottom: 10px;
                 right: 10px;
                 left: 10px;
                 min-width: unset;
+                padding: 18px 16px;
+                max-height: 65vh;
             }
             #login-box {
+                padding: 32px 24px;
                 min-width: unset;
-                width: 90%;
-                padding: 30px 20px;
+                width: 94vw;
+            }
+            #login-box h2 {
+                font-size: 28px;
+                letter-spacing: 4px;
+            }
+            #tooltip {
+                min-width: 170px;
+                padding: 14px 18px;
+            }
+            #tooltip .name {
+                font-size: 22px;
+            }
+            #tooltip .family {
+                font-size: 14px;
+            }
+        }
+        @media (max-width: 420px) {
+            #header {
+                padding: 4px 8px;
+                gap: 4px;
+            }
+            #header h1 {
+                font-size: 14px;
+                letter-spacing: 1px;
+                margin-right: 4px;
+            }
+            #searchInput {
+                font-size: 12px;
+                min-width: 50px;
+                padding: 4px 10px;
+            }
+            #familyFilter {
+                font-size: 11px;
+                max-width: 70px;
+                padding: 4px 8px;
+            }
+            .header-btn {
+                font-size: 11px;
+                padding: 4px 8px;
+            }
+            #stats {
+                font-size: 10px;
             }
         }
     </style>
@@ -273,31 +599,33 @@
     <!-- Логин -->
     <div id="login-overlay">
         <div id="login-box">
-            <h2>⚔️ Тейп Хачиро</h2>
-            <input type="password" id="loginPass" placeholder="Введите пароль доступа">
+            <span class="logo">⚔️</span>
+            <h2>ХАЧИРО</h2>
+            <div class="sub">родословная · тейп</div>
+            <input type="password" id="loginPass" placeholder="✦ ✦ ✦ ✦ ✦ ✦" maxlength="20" autofocus>
             <button onclick="checkLogin()">Войти в древо</button>
-            <div id="login-error">Неверный пароль</div>
+            <div id="login-error">⛔ Неверный ключ доступа</div>
         </div>
     </div>
 
-    <!-- Верхняя панель -->
+    <!-- Шапка -->
     <div id="header">
-        <h1>🌳 Хачиро</h1>
-        <input type="text" id="searchInput" placeholder="Поиск по имени..." oninput="searchByName(this.value)">
+        <h1>ХАЧИРО <span>· тейп</span></h1>
+        <input type="text" id="searchInput" placeholder="🔍 Поиск по имени..." oninput="searchByName(this.value)">
         <select id="familyFilter" onchange="filterByFamily(this.value)">
-            <option value="">Все семьи (гары)</option>
+            <option value="">Все гары</option>
         </select>
-        <button onclick="resetView()">🔄 Сброс</button>
-        <span id="stats">0 человек</span>
-        <button class="admin-btn" onclick="toggleAdmin()">⚙️ Админ</button>
+        <button class="header-btn" onclick="resetView()">⟲ Сброс</button>
+        <span id="stats">0</span>
+        <button class="header-btn admin" onclick="toggleAdmin()">⚙</button>
     </div>
 
-    <!-- Холст для дерева -->
+    <!-- Канвас -->
     <div id="canvas-wrapper">
         <canvas id="treeCanvas"></canvas>
     </div>
 
-    <!-- Подсказка при наведении -->
+    <!-- Тултип -->
     <div id="tooltip">
         <div class="name" id="tipName">—</div>
         <div class="family" id="tipFamily">—</div>
@@ -307,15 +635,15 @@
     <!-- Админ-панель -->
     <div id="admin-panel">
         <button class="close-admin" onclick="toggleAdmin()">✕</button>
-        <h3>⚙️ Добавить сына</h3>
-        <label>Отец</label>
+        <h3>⚔️ Добавить сына</h3>
+        <label>Отец (выбери из списка)</label>
         <select id="fatherSelect"></select>
         <label>Имя сына</label>
-        <input type="text" id="newSonName" placeholder="Введите имя">
-        <label>Семья (гар) сына</label>
-        <input type="text" id="newSonFamily" placeholder="Напр. Адаговы">
-        <button onclick="addSon()">➕ Добавить</button>
-        <hr style="border-color: #2a1f0e; margin: 16px 0;">
+        <input type="text" id="newSonName" placeholder="Например: Аслан">
+        <label>Семья (гар)</label>
+        <input type="text" id="newSonFamily" placeholder="Например: Адаговы">
+        <button class="admin-btn-submit" onclick="addSon()">➕ Добавить</button>
+        <hr class="admin-divider">
         <h3>✏️ Редактировать</h3>
         <label>Выбрать человека</label>
         <select id="editSelect"></select>
@@ -323,61 +651,55 @@
         <input type="text" id="editName" placeholder="Новое имя">
         <label>Новая семья</label>
         <input type="text" id="editFamily" placeholder="Новая семья">
-        <button onclick="editPerson()">💾 Сохранить</button>
+        <button class="admin-btn-submit" onclick="editPerson()">💾 Сохранить</button>
+        <div class="admin-note">Все изменения сохраняются в браузере</div>
     </div>
 
     <script>
         // ============================================================
-        // 1. ДАННЫЕ (здесь ты заменишь на свои 800+ человек)
+        // 1. ДАННЫЕ — ЧИСТО! Только ОДИН пример.
+        //    Ты добавишь своих 800+ человек сюда.
         // ============================================================
         let people = [
-            // Корень
-            { id: 'p1', name: 'Эли', family: 'Цуцаевы', fatherId: null },
-            // Ветвь Цуцаевых
-            { id: 'p2', name: 'Марс', family: 'Мирзоевы', fatherId: 'p1' },
-            { id: 'p3', name: 'Умар', family: 'Цуцаевы', fatherId: 'p1' },
-            // Ветвь Мирзоевых
-            { id: 'p4', name: 'Адаг', family: 'Адаговы', fatherId: 'p2' },
-            { id: 'p5', name: 'Абдул', family: 'Мирзоевы', fatherId: 'p2' },
-            { id: 'p6', name: 'Руслан', family: 'Мирзоевы', fatherId: 'p5' },
-            // Ветвь Адаговых
-            { id: 'p7', name: 'Ваха', family: 'Адаговы', fatherId: 'p4' },
-            { id: 'p8', name: 'Лечи', family: 'Адаговы', fatherId: 'p4' },
-            { id: 'p9', name: 'Хасан', family: 'Адаговы', fatherId: 'p4' },
-            { id: 'p10', name: 'Сайд', family: 'Адаговы', fatherId: 'p7' },
-            { id: 'p11', name: 'Магомед', family: 'Адаговы', fatherId: 'p7' },
-            { id: 'p12', name: 'Ахмед', family: 'Цуцаевы', fatherId: 'p3' },
-            { id: 'p13', name: 'Рамзан', family: 'Цуцаевы', fatherId: 'p3' },
-            // Еще для примера связи между семьями
-            { id: 'p14', name: 'Муса', family: 'Мирзоевы', fatherId: 'p6' },
-            { id: 'p15', name: 'Иса', family: 'Адаговы', fatherId: 'p11' },
+            { id: 'root1', name: 'Корень', family: 'Хачиро', fatherId: null }
         ];
 
-        // Цвета для семей (гаров)
+        // Цвета для семей (гаров) — благородные
         const familyColors = {
-            'Цуцаевы': '#b87333',
-            'Мирзоевы': '#2a6b5a',
-            'Адаговы': '#8b3a5a',
-            // Добавишь свои
+            'Хачиро': '#b8860b',
+            // Добавишь свои семьи с цветами:
+            // 'Адаговы': '#8b1a4a',
+            // 'Мирзоевы': '#1a6a5a',
+            // 'Цуцаевы': '#8a6a2a',
         };
+
+        function getFamilyColor(family) {
+            if (familyColors[family]) return familyColors[family];
+            const palette = ['#8b1a4a', '#1a6a5a', '#8a6a2a', '#2a4a7a', '#6a3a5a', '#3a6a4a', '#7a4a2a', '#2a5a6a'];
+            const idx = Object.keys(familyColors).length % palette.length;
+            familyColors[family] = palette[idx];
+            return familyColors[family];
+        }
 
         // ============================================================
         // 2. СОСТОЯНИЕ
         // ============================================================
-        let selectedId = null;
         let highlightIds = new Set();
         let dimFamily = null;
         let scale = 1;
         let offsetX = 0,
             offsetY = 0;
         let isDragging = false;
-        let dragStartX, dragStartY, dragStartOffX, dragStartOffY;
+        let dragStartX = 0,
+            dragStartY = 0;
+        let dragStartOffX = 0,
+            dragStartOffY = 0;
         let canvas, ctx;
         let nodePositions = new Map();
-        const NODE_W = 120,
-            NODE_H = 44;
-        const LVL_GAP = 80,
-            NODE_GAP = 16;
+        const NODE_W = 140,
+            NODE_H = 54;
+        const LVL_GAP = 70,
+            NODE_GAP = 22;
 
         // ============================================================
         // 3. ИНИЦИАЛИЗАЦИЯ
@@ -388,34 +710,74 @@
             resizeCanvas();
             window.addEventListener('resize', () => { resizeCanvas();
                 render(); });
-            canvas.addEventListener('mousedown', onMouseDown);
-            canvas.addEventListener('mousemove', onMouseMove);
-            canvas.addEventListener('mouseup', onMouseUp);
-            canvas.addEventListener('wheel', onWheel);
+            window.addEventListener('orientationchange', () => { setTimeout(() => { resizeCanvas();
+                    render(); }, 300); });
+
+            canvas.addEventListener('mousedown', onPointerDown);
+            canvas.addEventListener('mousemove', onPointerMove);
+            canvas.addEventListener('mouseup', onPointerUp);
+            canvas.addEventListener('mouseleave', onPointerUp);
+            canvas.addEventListener('wheel', onWheel, { passive: false });
+
+            canvas.addEventListener('touchstart', onTouchStart, { passive: false });
+            canvas.addEventListener('touchmove', onTouchMove, { passive: false });
+            canvas.addEventListener('touchend', onTouchEnd, { passive: false });
+
             canvas.addEventListener('click', onClick);
-            // Загружаем из localStorage
+
             loadFromStorage();
             buildFamilyFilter();
             updateStats();
-            render();
-            // Автовход (если пароль сохранен)
-            const savedPass = localStorage.getItem('dendro_pass');
-            if (savedPass === 'admin2026') {
-                document.getElementById('login-overlay').classList.add('hidden');
-            }
+
+            setTimeout(() => {
+                centerView();
+                render();
+            }, 150);
         }
 
         function resizeCanvas() {
             const rect = canvas.parentElement.getBoundingClientRect();
-            canvas.width = rect.width * devicePixelRatio;
-            canvas.height = rect.height * devicePixelRatio;
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
             canvas.style.width = rect.width + 'px';
             canvas.style.height = rect.height + 'px';
-            ctx.scale(devicePixelRatio, devicePixelRatio);
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(dpr, dpr);
         }
 
         // ============================================================
-        // 4. РАСЧЕТ ПОЗИЦИЙ (простое горизонтальное дерево)
+        // 4. ЦЕНТРИРОВКА
+        // ============================================================
+        function centerView() {
+            const posMap = computeLayout();
+            if (posMap.size === 0) return;
+            let minX = Infinity,
+                maxX = -Infinity,
+                minY = Infinity,
+                maxY = -Infinity;
+            posMap.forEach(pos => {
+                if (pos.x < minX) minX = pos.x;
+                if (pos.x > maxX) maxX = pos.x;
+                if (pos.y < minY) minY = pos.y;
+                if (pos.y > maxY) maxY = pos.y;
+            });
+            const cx = (minX + maxX) / 2;
+            const cy = (minY + maxY) / 2;
+            const w = canvas.width / (window.devicePixelRatio || 1);
+            const h = canvas.height / (window.devicePixelRatio || 1);
+            const treeW = maxX - minX + NODE_W;
+            const treeH = maxY - minY + NODE_H;
+            const scaleX = (w - 60) / (treeW + 80);
+            const scaleY = (h - 60) / (treeH + 80);
+            scale = Math.min(scaleX, scaleY, 1.2);
+            scale = Math.max(scale, 0.25);
+            offsetX = 0;
+            offsetY = 0;
+        }
+
+        // ============================================================
+        // 5. РАСЧЕТ ПОЗИЦИЙ (СВЕРХУ-ВНИЗ)
         // ============================================================
         function computeLayout() {
             const childrenMap = new Map();
@@ -423,9 +785,9 @@
                 if (!childrenMap.has(p.fatherId)) childrenMap.set(p.fatherId, []);
                 if (p.fatherId) childrenMap.get(p.fatherId).push(p);
             });
-            // Находим корень
             let root = people.find(p => p.fatherId === null);
-            if (!root) root = people[0];
+            if (!root && people.length) root = people[0];
+            if (!root) return new Map();
 
             const levels = [];
             const queue = [{ node: root, depth: 0 }];
@@ -440,14 +802,12 @@
                 kids.forEach(k => queue.push({ node: k, depth: depth + 1 }));
             }
 
-            // Выравниваем по вертикали
-            const maxDepth = levels.length;
             const posMap = new Map();
             levels.forEach((level, d) => {
-                const totalHeight = level.length * (NODE_H + NODE_GAP) - NODE_GAP;
+                const totalWidth = level.length * (NODE_W + NODE_GAP) - NODE_GAP;
                 level.forEach((p, idx) => {
-                    const y = (idx - (level.length - 1) / 2) * (NODE_H + NODE_GAP);
-                    const x = d * (NODE_W + LVL_GAP);
+                    const x = (idx - (level.length - 1) / 2) * (NODE_W + NODE_GAP);
+                    const y = d * (NODE_H + LVL_GAP);
                     posMap.set(p.id, { x, y });
                 });
             });
@@ -455,18 +815,20 @@
         }
 
         // ============================================================
-        // 5. ОТРИСОВКА
+        // 6. ОТРИСОВКА С АНИМАЦИЕЙ
         // ============================================================
+        let animFrame = 0;
+
         function render() {
-            const w = canvas.width / devicePixelRatio;
-            const h = canvas.height / devicePixelRatio;
+            const dpr = window.devicePixelRatio || 1;
+            const w = canvas.width / dpr;
+            const h = canvas.height / dpr;
             ctx.clearRect(0, 0, w, h);
 
-            // Собираем позиции
             const posMap = computeLayout();
             nodePositions = posMap;
+            if (posMap.size === 0) return;
 
-            // Центрируем
             let minX = Infinity,
                 maxX = -Infinity,
                 minY = Infinity,
@@ -477,70 +839,119 @@
                 if (pos.y < minY) minY = pos.y;
                 if (pos.y > maxY) maxY = pos.y;
             });
-            const treeW = maxX - minX + NODE_W;
-            const treeH = maxY - minY + NODE_H;
             const cx = (minX + maxX) / 2;
             const cy = (minY + maxY) / 2;
 
-            // Применяем смещение и масштаб
             ctx.save();
             ctx.translate(w / 2, h / 2);
             ctx.scale(scale, scale);
             ctx.translate(-cx + offsetX, -cy + offsetY);
 
-            // Рисуем линии
+            // Линии
             people.forEach(p => {
                 if (!p.fatherId) return;
                 const from = posMap.get(p.fatherId);
                 const to = posMap.get(p.id);
                 if (!from || !to) return;
+                const isHighlight = highlightIds.has(p.id) || highlightIds.has(p.fatherId);
                 ctx.beginPath();
-                ctx.moveTo(from.x + NODE_W / 2, from.y);
-                ctx.lineTo(from.x + NODE_W / 2 + (to.x - from.x - NODE_W) / 2, from.y);
-                ctx.lineTo(from.x + NODE_W / 2 + (to.x - from.x - NODE_W) / 2, to.y);
-                ctx.lineTo(to.x, to.y);
-                ctx.strokeStyle = '#4a3a2a';
-                ctx.lineWidth = 2;
+                const midY = from.y + NODE_H / 2 + (to.y - from.y - NODE_H) / 2;
+                ctx.moveTo(from.x + NODE_W / 2, from.y + NODE_H);
+                ctx.lineTo(from.x + NODE_W / 2, midY);
+                ctx.lineTo(to.x + NODE_W / 2, midY);
+                ctx.lineTo(to.x + NODE_W / 2, to.y);
+
+                if (isHighlight) {
+                    ctx.shadowColor = '#d4a843';
+                    ctx.shadowBlur = 18;
+                    ctx.strokeStyle = '#d4a843';
+                    ctx.lineWidth = 2.5;
+                } else {
+                    ctx.shadowColor = 'rgba(0,0,0,0)';
+                    ctx.shadowBlur = 0;
+                    ctx.strokeStyle = '#3a2a1a';
+                    ctx.lineWidth = 1.8;
+                }
                 ctx.stroke();
+                ctx.shadowBlur = 0;
             });
 
-            // Рисуем карточки
-            people.forEach(p => {
+            // Карточки
+            const now = Date.now();
+            people.forEach((p, idx) => {
                 const pos = posMap.get(p.id);
                 if (!pos) return;
                 const x = pos.x;
-                const y = pos.y - NODE_H / 2;
+                const y = pos.y;
                 const isHighlight = highlightIds.has(p.id);
                 const isDim = dimFamily && p.family !== dimFamily;
-                const color = familyColors[p.family] || '#5a4a3a';
+                const color = getFamilyColor(p.family);
 
-                ctx.globalAlpha = isDim ? 0.25 : 1;
+                // Анимация появления
+                const delay = idx * 15;
+                const age = Math.max(0, (now - (window._startTime || now)) - delay);
+                const appear = Math.min(1, age / 400);
+                const scaleY = isDim ? 1 : (0.3 + 0.7 * appear);
+
+                ctx.globalAlpha = isDim ? 0.15 : 1;
+
                 // Тень
-                ctx.shadowColor = isHighlight ? '#d4a843' : 'rgba(0,0,0,0.5)';
-                ctx.shadowBlur = isHighlight ? 24 : 8;
-                // Фон
-                ctx.fillStyle = isHighlight ? '#3d2d0a' : '#1a150e';
+                if (isHighlight) {
+                    ctx.shadowColor = '#d4a843';
+                    ctx.shadowBlur = 35;
+                } else {
+                    ctx.shadowColor = 'rgba(0,0,0,0.8)';
+                    ctx.shadowBlur = 15;
+                }
+
+                const grad = ctx.createLinearGradient(x, y, x + NODE_W, y + NODE_H);
+                if (isHighlight) {
+                    grad.addColorStop(0, '#3d2d0a');
+                    grad.addColorStop(1, '#1a150e');
+                } else {
+                    grad.addColorStop(0, '#1a150e');
+                    grad.addColorStop(1, '#0d0a08');
+                }
+                ctx.fillStyle = grad;
+
                 ctx.strokeStyle = isHighlight ? '#d4a843' : color;
-                ctx.lineWidth = isHighlight ? 3 : 1.5;
-                roundRect(ctx, x, y, NODE_W, NODE_H, 8);
+                ctx.lineWidth = isHighlight ? 2.5 : 1.5;
+
+                // Анимируем появление
+                const drawY = y + (1 - scaleY) * NODE_H / 2;
+                const drawH = NODE_H * scaleY;
+                if (drawH < 2) return;
+
+                roundRect(ctx, x, drawY, NODE_W, drawH, 10);
                 ctx.fill();
                 ctx.stroke();
                 ctx.shadowBlur = 0;
+
                 // Имя
-                ctx.fillStyle = isHighlight ? '#f0d080' : '#e0d5c0';
-                ctx.font = '16px "Segoe UI", sans-serif';
+                ctx.fillStyle = isHighlight ? '#f0d080' : '#e8ddd0';
+                ctx.font = 'bold 18px "Playfair Display", "Georgia", serif';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText(p.name, x + NODE_W / 2, y + NODE_H / 2 - 6);
-                // Семья (мелко)
-                ctx.fillStyle = isDim ? '#4a3a2a' : '#8a7a5a';
-                ctx.font = '10px "Segoe UI", sans-serif';
-                ctx.fillText(p.family, x + NODE_W / 2, y + NODE_H / 2 + 14);
+                const nameY = drawY + drawH / 2 - 4;
+                ctx.fillText(p.name, x + NODE_W / 2, nameY);
+
+                // Семья
+                if (drawH > 30) {
+                    ctx.fillStyle = isDim ? '#3a2a1a' : (isHighlight ? '#b89a6a' : '#6a5a4a');
+                    ctx.font = '12px "Cormorant Garamond", "Georgia", serif';
+                    ctx.fontStyle = 'italic';
+                    ctx.fillText(p.family, x + NODE_W / 2, nameY + 20);
+                }
+
                 ctx.globalAlpha = 1;
             });
 
             ctx.restore();
+            animFrame = requestAnimationFrame(render);
         }
+
+        // Запускаем таймер для анимации
+        window._startTime = Date.now();
 
         function roundRect(ctx, x, y, w, h, r) {
             ctx.beginPath();
@@ -557,20 +968,214 @@
         }
 
         // ============================================================
-        // 6. ПОИСК И ФИЛЬТРЫ
+        // 7. УПРАВЛЕНИЕ (МЫШЬ + ТАЧ)
+        // ============================================================
+        function getCanvasCoords(e) {
+            const rect = canvas.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            return {
+                x: (e.clientX - rect.left) / dpr,
+                y: (e.clientY - rect.top) / dpr
+            };
+        }
+
+        function onPointerDown(e) {
+            isDragging = true;
+            const pos = getCanvasCoords(e);
+            dragStartX = pos.x;
+            dragStartY = pos.y;
+            dragStartOffX = offsetX;
+            dragStartOffY = offsetY;
+            canvas.style.cursor = 'grabbing';
+        }
+
+        function onPointerMove(e) {
+            if (isDragging) {
+                const pos = getCanvasCoords(e);
+                const dx = (pos.x - dragStartX) / scale;
+                const dy = (pos.y - dragStartY) / scale;
+                offsetX = dragStartOffX + dx;
+                offsetY = dragStartOffY + dy;
+            }
+        }
+
+        function onPointerUp(e) {
+            isDragging = false;
+            canvas.style.cursor = 'grab';
+        }
+
+        let touchStartX = 0,
+            touchStartY = 0;
+        let touchStartOffX = 0,
+            touchStartOffY = 0;
+        let lastTouchDist = 0;
+        let isTouchDragging = false;
+
+        function onTouchStart(e) {
+            e.preventDefault();
+            const touches = e.touches;
+            if (touches.length === 1) {
+                isTouchDragging = true;
+                touchStartX = touches[0].clientX;
+                touchStartY = touches[0].clientY;
+                touchStartOffX = offsetX;
+                touchStartOffY = offsetY;
+            } else if (touches.length === 2) {
+                const dx = touches[0].clientX - touches[1].clientX;
+                const dy = touches[0].clientY - touches[1].clientY;
+                lastTouchDist = Math.sqrt(dx * dx + dy * dy);
+            }
+        }
+
+        function onTouchMove(e) {
+            e.preventDefault();
+            const touches = e.touches;
+            if (touches.length === 1 && isTouchDragging) {
+                const dx = (touches[0].clientX - touchStartX) / scale;
+                const dy = (touches[0].clientY - touchStartY) / scale;
+                offsetX = touchStartOffX + dx;
+                offsetY = touchStartOffY + dy;
+            } else if (touches.length === 2) {
+                const dx = touches[0].clientX - touches[1].clientX;
+                const dy = touches[0].clientY - touches[1].clientY;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (lastTouchDist > 0) {
+                    const delta = dist / lastTouchDist;
+                    scale = Math.min(Math.max(scale * delta, 0.15), 3.5);
+                }
+                lastTouchDist = dist;
+            }
+        }
+
+        function onTouchEnd(e) {
+            isTouchDragging = false;
+            lastTouchDist = 0;
+        }
+
+        // ============================================================
+        // 8. КОЛЕСИКО
+        // ============================================================
+        function onWheel(e) {
+            e.preventDefault();
+            const delta = e.deltaY > 0 ? 0.92 : 1.08;
+            const newScale = Math.min(Math.max(scale * delta, 0.15), 3.5);
+            const rect = canvas.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            const mx = (e.clientX - rect.left) / dpr;
+            const my = (e.clientY - rect.top) / dpr;
+            const w = canvas.width / dpr;
+            const h = canvas.height / dpr;
+            const ratio = newScale / scale;
+            offsetX = (offsetX - (mx - w / 2) / scale) * ratio + (mx - w / 2) / newScale;
+            offsetY = (offsetY - (my - h / 2) / scale) * ratio + (my - h / 2) / newScale;
+            scale = newScale;
+        }
+
+        // ============================================================
+        // 9. КЛИК
+        // ============================================================
+        function onClick(e) {
+            const rect = canvas.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            const mx = (e.clientX - rect.left) / dpr;
+            const my = (e.clientY - rect.top) / dpr;
+            const w = canvas.width / dpr;
+            const h = canvas.height / dpr;
+
+            const posMap = nodePositions;
+            if (posMap.size === 0) return;
+
+            let minX = Infinity,
+                maxX = -Infinity,
+                minY = Infinity,
+                maxY = -Infinity;
+            posMap.forEach(pos => {
+                if (pos.x < minX) minX = pos.x;
+                if (pos.x > maxX) maxX = pos.x;
+                if (pos.y < minY) minY = pos.y;
+                if (pos.y > maxY) maxY = pos.y;
+            });
+            const cx = (minX + maxX) / 2;
+            const cy = (minY + maxY) / 2;
+
+            const tx = (mx - w / 2) / scale + cx - offsetX;
+            const ty = (my - h / 2) / scale + cy - offsetY;
+
+            let found = null;
+            let minDist = 70;
+            posMap.forEach((pos, id) => {
+                const dx = pos.x + NODE_W / 2 - tx;
+                const dy = pos.y + NODE_H / 2 - ty;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < minDist) {
+                    minDist = dist;
+                    found = id;
+                }
+            });
+
+            if (found) {
+                const p = people.find(pp => pp.id === found);
+                if (p) {
+                    showTooltip(e.clientX, e.clientY, p);
+                    highlightIds.clear();
+                    let cur = p;
+                    while (cur) {
+                        highlightIds.add(cur.id);
+                        const father = people.find(pp => pp.id === cur.fatherId);
+                        cur = father;
+                    }
+                }
+            } else {
+                highlightIds.clear();
+                document.getElementById('tooltip').style.display = 'none';
+            }
+        }
+
+        // ============================================================
+        // 10. ТУЛТИП
+        // ============================================================
+        let tooltipTimeout;
+
+        function showTooltip(clientX, clientY, p) {
+            const tip = document.getElementById('tooltip');
+            document.getElementById('tipName').textContent = p.name;
+            document.getElementById('tipFamily').textContent = p.family;
+
+            let chain = [];
+            let cur = p;
+            while (cur) {
+                chain.push(cur.name);
+                const father = people.find(pp => pp.id === cur.fatherId);
+                cur = father;
+            }
+            document.getElementById('tipLineage').innerHTML = 'Предки: <span>' + chain.join(' → ') + '</span>';
+
+            tip.style.display = 'block';
+            let left = clientX + 18;
+            let top = clientY - 10;
+            if (left + 250 > window.innerWidth) left = clientX - 250;
+            if (top + 130 > window.innerHeight) top = window.innerHeight - 140;
+            if (top < 10) top = 10;
+            tip.style.left = left + 'px';
+            tip.style.top = top + 'px';
+
+            clearTimeout(tooltipTimeout);
+            tooltipTimeout = setTimeout(() => {
+                tip.style.display = 'none';
+            }, 5000);
+        }
+
+        // ============================================================
+        // 11. ПОИСК И ФИЛЬТР
         // ============================================================
         function searchByName(query) {
             highlightIds.clear();
             dimFamily = null;
-            if (!query.trim()) {
-                render();
-                return;
-            }
+            if (!query.trim()) return;
             const q = query.trim().toLowerCase();
             people.forEach(p => {
                 if (p.name.toLowerCase().includes(q)) {
                     highlightIds.add(p.id);
-                    // Добавляем предков
                     let cur = p;
                     while (cur.fatherId) {
                         const father = people.find(pp => pp.id === cur.fatherId);
@@ -580,13 +1185,11 @@
                     }
                 }
             });
-            render();
         }
 
         function filterByFamily(family) {
             dimFamily = family || null;
             highlightIds.clear();
-            render();
         }
 
         function resetView() {
@@ -594,130 +1197,17 @@
             dimFamily = null;
             document.getElementById('searchInput').value = '';
             document.getElementById('familyFilter').value = '';
-            offsetX = 0;
-            offsetY = 0;
-            scale = 1;
-            render();
+            centerView();
+            document.getElementById('tooltip').style.display = 'none';
         }
 
         // ============================================================
-        // 7. ВЗАИМОДЕЙСТВИЕ (мышь, клик, тултип)
-        // ============================================================
-        function onMouseDown(e) {
-            isDragging = true;
-            const rect = canvas.getBoundingClientRect();
-            dragStartX = e.clientX - rect.left;
-            dragStartY = e.clientY - rect.top;
-            dragStartOffX = offsetX;
-            dragStartOffY = offsetY;
-            canvas.style.cursor = 'grabbing';
-        }
-
-        function onMouseMove(e) {
-            const rect = canvas.getBoundingClientRect();
-            const mx = e.clientX - rect.left;
-            const my = e.clientY - rect.top;
-            if (isDragging) {
-                const dx = mx - dragStartX;
-                const dy = my - dragStartY;
-                offsetX = dragStartOffX + dx / scale;
-                offsetY = dragStartOffY + dy / scale;
-                render();
-            } else {
-                // Тултип
-                const pos = getMousePos(e);
-                let found = null;
-                nodePositions.forEach((pos2, id) => {
-                    const px = (pos2.x * scale + (canvas.width / 2 / devicePixelRatio - (nodePositions.get([...nodePositions
-                        .keys()][0])?.x || 0) * scale + offsetX * scale));
-                    // упростим: проверяем попадание
-                });
-                // Упрощенно показываем тултип только при клике
-            }
-        }
-
-        function onMouseUp(e) {
-            isDragging = false;
-            canvas.style.cursor = 'grab';
-        }
-
-        function onWheel(e) {
-            e.preventDefault();
-            const delta = e.deltaY > 0 ? 0.9 : 1.1;
-            scale = Math.min(Math.max(scale * delta, 0.2), 3);
-            render();
-        }
-
-        function onClick(e) {
-            const rect = canvas.getBoundingClientRect();
-            const mx = (e.clientX - rect.left) / devicePixelRatio;
-            const my = (e.clientY - rect.top) / devicePixelRatio;
-            // Преобразуем в координаты дерева
-            const w = canvas.width / devicePixelRatio;
-            const h = canvas.height / devicePixelRatio;
-            // Инвертируем трансформацию
-            const tx = (mx - w / 2) / scale + (nodePositions.get([...nodePositions.keys()][0])?.x || 0) - offsetX;
-            const ty = (my - h / 2) / scale + (nodePositions.get([...nodePositions.keys()][0])?.y || 0) - offsetY;
-            // Ищем ближайший узел
-            let found = null;
-            let minDist = 60;
-            nodePositions.forEach((pos, id) => {
-                const dx = pos.x + NODE_W / 2 - tx;
-                const dy = pos.y - ty;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                if (dist < minDist) {
-                    minDist = dist;
-                    found = id;
-                }
-            });
-            if (found) {
-                const p = people.find(pp => pp.id === found);
-                if (p) showTooltip(e.clientX, e.clientY, p);
-                // Показываем предков
-                highlightIds.clear();
-                let cur = p;
-                while (cur) {
-                    highlightIds.add(cur.id);
-                    const father = people.find(pp => pp.id === cur.fatherId);
-                    cur = father;
-                }
-                render();
-            }
-        }
-
-        function showTooltip(clientX, clientY, p) {
-            const tip = document.getElementById('tooltip');
-            document.getElementById('tipName').textContent = p.name;
-            document.getElementById('tipFamily').textContent = 'Семья: ' + p.family;
-            // Цепочка предков
-            let chain = [];
-            let cur = p;
-            while (cur) {
-                chain.push(cur.name);
-                const father = people.find(pp => pp.id === cur.fatherId);
-                cur = father;
-            }
-            document.getElementById('tipLineage').textContent = 'Предки: ' + chain.join(' → ');
-            tip.style.display = 'block';
-            tip.style.left = (clientX + 16) + 'px';
-            tip.style.top = (clientY - 10) + 'px';
-            setTimeout(() => { tip.style.display = 'none'; }, 4000);
-        }
-
-        function getMousePos(e) {
-            const rect = canvas.getBoundingClientRect();
-            return { x: e.clientX - rect.left, y: e.clientY - rect.top };
-        }
-
-        // ============================================================
-        // 8. АДМИНКА
+        // 12. АДМИНКА
         // ============================================================
         function toggleAdmin() {
             const panel = document.getElementById('admin-panel');
             panel.classList.toggle('active');
-            if (panel.classList.contains('active')) {
-                populateSelects();
-            }
+            if (panel.classList.contains('active')) populateSelects();
         }
 
         function populateSelects() {
@@ -725,7 +1215,8 @@
             const editSel = document.getElementById('editSelect');
             fatherSel.innerHTML = '';
             editSel.innerHTML = '';
-            people.forEach(p => {
+            const sorted = [...people].sort((a, b) => a.name.localeCompare(b.name));
+            sorted.forEach(p => {
                 const opt1 = document.createElement('option');
                 opt1.value = p.id;
                 opt1.textContent = p.name + ' (' + p.family + ')';
@@ -741,17 +1232,17 @@
             const fatherId = document.getElementById('fatherSelect').value;
             const name = document.getElementById('newSonName').value.trim();
             const family = document.getElementById('newSonFamily').value.trim();
-            if (!name || !family) { alert('Введите имя и семью!'); return; }
-            const newId = 'p' + Date.now();
+            if (!name || !family) { alert('⚠️ Введите имя и семью!'); return; }
+            const newId = 'p' + Date.now() + Math.random().toString(36).slice(2, 6);
             people.push({ id: newId, name, family, fatherId });
             saveToStorage();
             buildFamilyFilter();
             updateStats();
             populateSelects();
-            render();
+            centerView();
             document.getElementById('newSonName').value = '';
             document.getElementById('newSonFamily').value = '';
-            alert('Добавлен ' + name);
+            alert('✅ ' + name + ' добавлен!');
         }
 
         function editPerson() {
@@ -759,24 +1250,24 @@
             const name = document.getElementById('editName').value.trim();
             const family = document.getElementById('editFamily').value.trim();
             const p = people.find(pp => pp.id === id);
-            if (!p) return;
+            if (!p) { alert('⚠️ Не найден'); return; }
             if (name) p.name = name;
             if (family) p.family = family;
+            if (!name && !family) { alert('⚠️ Введите данные'); return; }
             saveToStorage();
             buildFamilyFilter();
             updateStats();
             populateSelects();
-            render();
-            alert('Обновлено!');
+            alert('✅ Обновлено!');
+            document.getElementById('editName').value = '';
+            document.getElementById('editFamily').value = '';
         }
 
         // ============================================================
-        // 9. ХРАНЕНИЕ В LOCALSTORAGE
+        // 13. ХРАНЕНИЕ
         // ============================================================
         function saveToStorage() {
-            try {
-                localStorage.setItem('dendro_people', JSON.stringify(people));
-            } catch (e) { console.warn('Storage error'); }
+            try { localStorage.setItem('dendro_people', JSON.stringify(people)); } catch (e) {}
         }
 
         function loadFromStorage() {
@@ -784,19 +1275,22 @@
                 const data = localStorage.getItem('dendro_people');
                 if (data) {
                     const parsed = JSON.parse(data);
-                    if (parsed && parsed.length) people = parsed;
+                    if (parsed && parsed.length) {
+                        people = parsed;
+                        people.forEach(p => getFamilyColor(p.family));
+                    }
                 }
-            } catch (e) { console.warn('Load error'); }
+            } catch (e) {}
         }
 
         // ============================================================
-        // 10. ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+        // 14. ВСПОМОГАТЕЛЬНЫЕ
         // ============================================================
         function buildFamilyFilter() {
-            const families = [...new Set(people.map(p => p.family))];
+            const families = [...new Set(people.map(p => p.family))].sort();
             const sel = document.getElementById('familyFilter');
             const current = sel.value;
-            sel.innerHTML = '<option value="">Все семьи (гары)</option>';
+            sel.innerHTML = '<option value="">Все гары</option>';
             families.forEach(f => {
                 const opt = document.createElement('option');
                 opt.value = f;
@@ -807,7 +1301,7 @@
         }
 
         function updateStats() {
-            document.getElementById('stats').textContent = people.length + ' человек';
+            document.getElementById('stats').textContent = people.length + ' чел.';
         }
 
         function checkLogin() {
@@ -815,13 +1309,24 @@
             if (pass === 'admin2026') {
                 document.getElementById('login-overlay').classList.add('hidden');
                 localStorage.setItem('dendro_pass', 'admin2026');
+                setTimeout(() => { centerView(); }, 200);
             } else {
                 document.getElementById('login-error').style.display = 'block';
+                document.getElementById('loginPass').value = '';
             }
         }
 
+        document.addEventListener('DOMContentLoaded', () => {
+            if (localStorage.getItem('dendro_pass') === 'admin2026') {
+                document.getElementById('login-overlay').classList.add('hidden');
+            }
+            document.getElementById('loginPass').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') checkLogin();
+            });
+        });
+
         // ============================================================
-        // 11. ЗАПУСК
+        // 15. ЗАПУСК
         // ============================================================
         window.onload = init;
     </script>
