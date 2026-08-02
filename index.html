@@ -194,118 +194,9 @@
             font-weight: 500;
         }
 
+        /* Скрываем админ-панель — она не нужна */
         #admin-panel {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            z-index: 150;
-            display: none;
-            background: #ffffff;
-            border: 1px solid #e8edf2;
-            border-radius: 16px;
-            padding: 24px 28px;
-            min-width: 320px;
-            max-width: 92vw;
-            max-height: 80vh;
-            overflow-y: auto;
-            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.08);
-        }
-        #admin-panel.active {
-            display: block;
-        }
-        #admin-panel::-webkit-scrollbar {
-            width: 4px;
-        }
-        #admin-panel::-webkit-scrollbar-track {
-            background: #f0f2f5;
-        }
-        #admin-panel::-webkit-scrollbar-thumb {
-            background: #d0d7e0;
-            border-radius: 4px;
-        }
-        #admin-panel h3 {
-            font-family: 'Inter', sans-serif;
-            font-weight: 600;
-            color: #1a1a2e;
-            font-size: 16px;
-            letter-spacing: -0.2px;
-            margin-bottom: 16px;
-            border-bottom: 1px solid #eef2f7;
-            padding-bottom: 12px;
-        }
-        #admin-panel label {
-            display: block;
-            margin: 12px 0 4px;
-            color: #6b7a8f;
-            font-family: 'Inter', sans-serif;
-            font-size: 12px;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-        }
-        #admin-panel select,
-        #admin-panel input {
-            width: 100%;
-            padding: 10px 14px;
-            border-radius: 8px;
-            border: 1.5px solid #dce3eb;
-            background: #f8fafc;
-            color: #1a1a2e;
-            font-family: 'Inter', sans-serif;
-            font-size: 14px;
-            font-weight: 400;
-            outline: none;
-            transition: 0.2s;
-        }
-        #admin-panel select:focus,
-        #admin-panel input:focus {
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
-        }
-        .admin-btn-submit {
-            margin-top: 16px;
-            width: 100%;
-            padding: 12px;
-            background: #1a1a2e;
-            border: none;
-            border-radius: 8px;
-            color: #ffffff;
-            font-family: 'Inter', sans-serif;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .admin-btn-submit:hover {
-            background: #2d2d4a;
-        }
-        .close-admin {
-            position: absolute;
-            top: 12px;
-            right: 16px;
-            background: none;
-            border: none;
-            color: #9aa8b9;
-            font-size: 24px;
-            cursor: pointer;
-            transition: 0.2s;
-            line-height: 1;
-        }
-        .close-admin:hover {
-            color: #1a1a2e;
-        }
-        .admin-divider {
-            border: none;
-            border-top: 1px solid #eef2f7;
-            margin: 18px 0;
-        }
-        .admin-note {
-            color: #9aa8b9;
-            font-family: 'Inter', sans-serif;
-            font-size: 12px;
-            font-weight: 400;
-            margin-top: 10px;
-            text-align: center;
+            display: none !important;
         }
 
         #login-overlay {
@@ -425,13 +316,6 @@
             #stats {
                 font-size: 12px;
             }
-            #admin-panel {
-                bottom: 10px;
-                right: 10px;
-                left: 10px;
-                min-width: unset;
-                padding: 18px 16px;
-            }
             #login-box {
                 padding: 32px 24px;
                 min-width: unset;
@@ -511,19 +395,7 @@
         <div class="lineage" id="tipLineage">—</div>
     </div>
 
-    <div id="admin-panel">
-        <button class="close-admin" onclick="toggleAdmin()">✕</button>
-        <h3>Добавить сына</h3>
-        <label>Отец</label>
-        <select id="fatherSelect"></select>
-        <label>Имя сына</label>
-        <input type="text" id="newSonName" placeholder="Введите имя">
-        <label>Семья (гар)</label>
-        <input type="text" id="newSonFamily" placeholder="Напр. Ведчарой">
-        <button class="admin-btn-submit" onclick="addSon()">➕ Добавить</button>
-        <hr class="admin-divider">
-        <div class="admin-note">В админ-режиме на карточках появятся ✏️ и ➕</div>
-    </div>
+    <!-- Админ-панель скрыта, всё через карточки -->
 
     <script>
         // ============================================================
@@ -567,7 +439,6 @@
 
         let editMode = false;
         let editingId = null;
-        let adminActive = false;
 
         // ============================================================
         // 3. ИНИЦИАЛИЗАЦИЯ
@@ -677,7 +548,7 @@
         }
 
         // ============================================================
-        // 4. ОТРИСОВКА С КНОПКАМИ НА КАРТОЧКАХ
+        // 4. ОТРИСОВКА
         // ============================================================
         function render() {
             const dpr = window.devicePixelRatio || 1;
@@ -739,7 +610,7 @@
 
                 ctx.globalAlpha = isDim ? 0.2 : 1;
 
-                // Фон карточки
+                // Фон
                 ctx.fillStyle = isHighlight ? '#eff6ff' : '#ffffff';
                 ctx.strokeStyle = isHighlight ? '#2563eb' : '#dce3eb';
                 ctx.lineWidth = isHighlight ? 2 : 1.5;
@@ -756,22 +627,23 @@
                 ctx.shadowOffsetY = 0;
 
                 // ============================================
-                // ИМЯ (если редактируем — показываем поле ввода)
+                // ИМЯ (если редактируем — поле ввода прямо на карточке)
                 // ============================================
                 if (isEditing && editMode) {
+                    // Белая подложка под текст
                     ctx.fillStyle = '#ffffff';
-                    roundRect(ctx, x + 10, y + 10, NODE_W - 20, NODE_H - 38, 6);
+                    roundRect(ctx, x + 10, y + 8, NODE_W - 20, NODE_H - 32, 6);
                     ctx.fill();
                     ctx.strokeStyle = '#2563eb';
                     ctx.lineWidth = 2;
-                    roundRect(ctx, x + 10, y + 10, NODE_W - 20, NODE_H - 38, 6);
+                    roundRect(ctx, x + 10, y + 8, NODE_W - 20, NODE_H - 32, 6);
                     ctx.stroke();
 
                     ctx.fillStyle = '#1a1a2e';
                     ctx.font = '600 16px Inter, sans-serif';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
-                    ctx.fillText('✎ ' + p.name, x + NODE_W / 2, y + NODE_H / 2 - 4);
+                    ctx.fillText('✎ ' + p.name, x + NODE_W / 2, y + NODE_H / 2 - 2);
                 } else {
                     ctx.fillStyle = '#1a1a2e';
                     ctx.font = '600 16px Inter, sans-serif';
@@ -779,14 +651,14 @@
                     ctx.textBaseline = 'middle';
                     ctx.fillText(p.name, x + NODE_W / 2, y + NODE_H / 2 - 6);
 
-                    // Семья (мелко снизу)
+                    // Семья
                     ctx.fillStyle = '#6b7a8f';
                     ctx.font = '11px Inter, sans-serif';
                     ctx.fillText(p.family, x + NODE_W / 2, y + NODE_H / 2 + 16);
                 }
 
                 // ============================================
-                // КНОПКИ (только в админ-режиме)
+                // ✏️ и ➕ (только в админ-режиме)
                 // ============================================
                 if (editMode) {
                     // ✏️ Карандаш — правый верхний угол
@@ -930,7 +802,7 @@
         }
 
         // ============================================================
-        // 6. КЛИК — определяем, куда нажали (✏️, ➕ или имя)
+        // 6. КЛИК ПО КАРТОЧКЕ — ВСЁ ЧЕРЕЗ НЕЁ
         // ============================================================
         function onClick(e) {
             const rect = canvas.getBoundingClientRect();
@@ -959,7 +831,7 @@
             const tx = (mx - w / 2) / scale + cx - offsetX;
             const ty = (my - h / 2) / scale + cy - offsetY;
 
-            // Ищем, на какую карточку нажали
+            // Находим карточку
             let found = null;
             let minDist = 70;
             posMap.forEach((pos, id) => {
@@ -973,7 +845,9 @@
             });
 
             if (!found) {
+                // Клик вне карточки — сброс
                 highlightIds.clear();
+                editingId = null;
                 document.getElementById('tooltip').style.display = 'none';
                 render();
                 return;
@@ -982,26 +856,28 @@
             const p = people.find(pp => pp.id === found);
             if (!p) return;
 
-            // Если админ-режим включён
+            // ============================================
+            // АДМИН-РЕЖИМ: всё через карточку
+            // ============================================
             if (editMode) {
-                // Вычисляем относительные координаты внутри карточки
                 const pos = posMap.get(found);
                 const localX = (tx - pos.x) / NODE_W;
                 const localY = (ty - pos.y) / NODE_H;
 
-                // ➕ Плюсик внизу по центру (localY ~ 0.85-1.0, localX ~ 0.4-0.6)
+                // ➕ Плюсик внизу по центру — добавить сына
                 if (localY > 0.75 && localX > 0.3 && localX < 0.7) {
-                    // Добавить сына
-                    const fatherId = p.id;
-                    const family = p.family;
                     const newName = prompt('➕ Добавить сына для ' + p.name + '\n\nВведите имя:');
                     if (newName && newName.trim() !== '') {
                         const newId = 'p' + Date.now() + Math.random().toString(36).slice(2, 6);
-                        people.push({ id: newId, name: newName.trim(), family: family, fatherId: fatherId });
+                        people.push({
+                            id: newId,
+                            name: newName.trim(),
+                            family: p.family,
+                            fatherId: p.id
+                        });
                         saveToStorage();
                         buildFamilyFilter();
                         updateStats();
-                        populateSelects();
                         centerView();
                         render();
                         alert('✅ ' + newName.trim() + ' добавлен!');
@@ -1009,21 +885,74 @@
                     return;
                 }
 
-                // ✏️ Карандаш в правом верхнем углу (localX ~ 0.85-1.0, localY ~ 0.0-0.2)
+                // ✏️ Карандаш в правом верхнем углу — редактировать имя
                 if (localX > 0.8 && localY < 0.25) {
-                    const newName = prompt('✏️ Редактирование\n\nИмя:', p.name);
-                    if (newName !== null && newName.trim() !== '') {
-                        p.name = newName.trim();
-                        saveToStorage();
-                        buildFamilyFilter();
-                        updateStats();
+                    // Включаем режим редактирования прямо на карточке
+                    editingId = p.id;
+                    render();
+
+                    // Создаём невидимое поле ввода поверх канваса
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.value = p.name;
+                    input.style.position = 'fixed';
+                    input.style.left = (e.clientX - 60) + 'px';
+                    input.style.top = (e.clientY - 20) + 'px';
+                    input.style.width = '120px';
+                    input.style.padding = '8px 12px';
+                    input.style.border = '2px solid #2563eb';
+                    input.style.borderRadius = '8px';
+                    input.style.background = '#ffffff';
+                    input.style.color = '#1a1a2e';
+                    input.style.fontFamily = 'Inter, sans-serif';
+                    input.style.fontSize = '16px';
+                    input.style.fontWeight = '600';
+                    input.style.outline = 'none';
+                    input.style.boxShadow = '0 4px 16px rgba(0,0,0,0.12)';
+                    input.style.zIndex = '300';
+                    input.autofocus = true;
+                    input.select();
+
+                    document.body.appendChild(input);
+
+                    input.addEventListener('blur', () => {
+                        const val = input.value.trim();
+                        if (val && val !== '') {
+                            p.name = val;
+                            saveToStorage();
+                            buildFamilyFilter();
+                            updateStats();
+                        }
+                        editingId = null;
+                        document.body.removeChild(input);
                         render();
-                        alert('✅ Имя обновлено!');
-                    }
+                    });
+
+                    input.addEventListener('keydown', (ev) => {
+                        if (ev.key === 'Enter') {
+                            input.blur();
+                        }
+                        if (ev.key === 'Escape') {
+                            editingId = null;
+                            document.body.removeChild(input);
+                            render();
+                        }
+                    });
+
+                    // Закрываем по клику вне
+                    setTimeout(() => {
+                        document.addEventListener('click', function closeHandler(ev2) {
+                            if (ev2.target !== input) {
+                                input.blur();
+                                document.removeEventListener('click', closeHandler);
+                            }
+                        });
+                    }, 100);
+
                     return;
                 }
 
-                // Если кликнули по самой карточке (не по кнопкам) — показываем тултип
+                // Если кликнули по телу карточки (не по кнопкам) — показываем тултип
                 showTooltip(e.clientX, e.clientY, p);
                 highlightIds.clear();
                 let cur = p;
@@ -1036,7 +965,9 @@
                 return;
             }
 
-            // Обычный режим (не админ) — тултип и подсветка
+            // ============================================
+            // ОБЫЧНЫЙ РЕЖИМ (не админ) — тултип
+            // ============================================
             showTooltip(e.clientX, e.clientY, p);
             highlightIds.clear();
             let cur = p;
@@ -1088,6 +1019,7 @@
         function searchByName(query) {
             highlightIds.clear();
             dimFamily = null;
+            editingId = null;
             if (!query.trim()) { render(); return; }
             const q = query.trim().toLowerCase();
             people.forEach(p => {
@@ -1108,12 +1040,14 @@
         function filterByFamily(family) {
             dimFamily = family || null;
             highlightIds.clear();
+            editingId = null;
             render();
         }
 
         function resetView() {
             highlightIds.clear();
             dimFamily = null;
+            editingId = null;
             document.getElementById('searchInput').value = '';
             document.getElementById('familyFilter').value = '';
             centerView();
@@ -1122,55 +1056,20 @@
         }
 
         // ============================================================
-        // 9. АДМИНКА
+        // 9. АДМИН-РЕЖИМ (вкл/выкл)
         // ============================================================
         function toggleAdmin() {
-            const panel = document.getElementById('admin-panel');
-            adminActive = !adminActive;
-            panel.classList.toggle('active');
-            editMode = adminActive;
-
+            editMode = !editMode;
             const btn = document.querySelector('.header-btn.admin');
-            if (adminActive) {
+            if (editMode) {
                 btn.classList.add('active');
                 btn.textContent = 'Админ ✓';
-                populateSelects();
             } else {
                 btn.classList.remove('active');
                 btn.textContent = 'Админ';
                 editingId = null;
             }
             render();
-        }
-
-        function populateSelects() {
-            const fatherSel = document.getElementById('fatherSelect');
-            fatherSel.innerHTML = '';
-            const sorted = [...people].sort((a, b) => a.name.localeCompare(b.name));
-            sorted.forEach(p => {
-                const opt = document.createElement('option');
-                opt.value = p.id;
-                opt.textContent = p.name + ' (' + p.family + ')';
-                fatherSel.appendChild(opt);
-            });
-        }
-
-        function addSon() {
-            const fatherId = document.getElementById('fatherSelect').value;
-            const name = document.getElementById('newSonName').value.trim();
-            const family = document.getElementById('newSonFamily').value.trim();
-            if (!name || !family) { alert('⚠️ Введите имя и семью!'); return; }
-            const newId = 'p' + Date.now() + Math.random().toString(36).slice(2, 6);
-            people.push({ id: newId, name, family, fatherId });
-            saveToStorage();
-            buildFamilyFilter();
-            updateStats();
-            populateSelects();
-            centerView();
-            render();
-            document.getElementById('newSonName').value = '';
-            document.getElementById('newSonFamily').value = '';
-            alert('✅ ' + name + ' добавлен!');
         }
 
         // ============================================================
