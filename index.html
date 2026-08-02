@@ -4,25 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Древо тейпа Хьачарой</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             user-select: none;
-            -webkit-touch-callout: none;
             -webkit-user-select: none;
         }
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f5f7fa;
+            font-family: Arial, sans-serif;
+            background: #f0f2f5;
             overflow: hidden;
             height: 100vh;
             position: fixed;
             width: 100%;
-            touch-action: none;
-            color: #1a1a2e;
         }
 
         #header {
@@ -32,21 +28,19 @@
             right: 0;
             z-index: 100;
             background: #ffffff;
-            padding: 10px 24px;
+            padding: 10px 20px;
             display: flex;
             flex-wrap: wrap;
             align-items: center;
-            gap: 12px;
-            border-bottom: 1px solid #e8edf2;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+            gap: 10px;
+            border-bottom: 1px solid #d0d7de;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
         }
         #header h1 {
-            font-family: 'Inter', sans-serif;
             font-size: 18px;
             font-weight: 700;
             color: #1a1a2e;
-            letter-spacing: -0.3px;
-            margin-right: 16px;
+            margin-right: 10px;
             white-space: nowrap;
         }
         #header h1 span {
@@ -57,69 +51,47 @@
         }
         #searchInput {
             flex: 1;
-            min-width: 160px;
-            padding: 8px 16px;
-            border-radius: 8px;
-            border: 1.5px solid #dce3eb;
+            min-width: 120px;
+            padding: 6px 14px;
+            border-radius: 6px;
+            border: 1px solid #d0d7de;
             background: #f8fafc;
             color: #1a1a2e;
-            font-family: 'Inter', sans-serif;
             font-size: 14px;
-            font-weight: 400;
             outline: none;
-            transition: all 0.2s;
         }
         #searchInput:focus {
             border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-            background: #ffffff;
-        }
-        #searchInput::placeholder {
-            color: #9aa8b9;
         }
         #familyFilter {
-            padding: 8px 14px;
-            border-radius: 8px;
-            border: 1.5px solid #dce3eb;
+            padding: 6px 14px;
+            border-radius: 6px;
+            border: 1px solid #d0d7de;
             background: #f8fafc;
             color: #1a1a2e;
-            font-family: 'Inter', sans-serif;
             font-size: 14px;
-            font-weight: 400;
             outline: none;
             cursor: pointer;
-            min-width: 130px;
-            transition: 0.2s;
-        }
-        #familyFilter:focus {
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            min-width: 120px;
         }
         .header-btn {
-            padding: 8px 18px;
-            border-radius: 8px;
-            border: 1.5px solid #dce3eb;
+            padding: 6px 16px;
+            border-radius: 6px;
+            border: 1px solid #d0d7de;
             background: #f8fafc;
             color: #1a1a2e;
-            font-family: 'Inter', sans-serif;
             font-size: 13px;
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.2s;
             white-space: nowrap;
         }
         .header-btn:hover {
             background: #eef2f7;
-            border-color: #bcc9d9;
         }
         .header-btn.admin {
             background: #1a1a2e;
             color: #ffffff;
             border-color: #1a1a2e;
-        }
-        .header-btn.admin:hover {
-            background: #2d2d4a;
-            border-color: #2d2d4a;
         }
         .header-btn.admin.active {
             background: #2563eb;
@@ -127,22 +99,19 @@
         }
         #stats {
             color: #6b7a8f;
-            font-family: 'Inter', sans-serif;
             font-size: 13px;
-            font-weight: 400;
             white-space: nowrap;
-            margin-left: 4px;
         }
 
         #canvas-wrapper {
             position: fixed;
-            top: 64px;
+            top: 60px;
             left: 0;
             right: 0;
             bottom: 0;
             z-index: 1;
+            background: #f0f2f5;
             touch-action: none;
-            background: #f5f7fa;
         }
         #treeCanvas {
             width: 100%;
@@ -155,45 +124,6 @@
             cursor: grabbing;
         }
 
-        #tooltip {
-            position: fixed;
-            display: none;
-            background: #ffffff;
-            border: 1px solid #e8edf2;
-            border-radius: 12px;
-            padding: 16px 20px;
-            min-width: 200px;
-            pointer-events: none;
-            z-index: 200;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-        }
-        #tooltip .name {
-            font-family: 'Inter', sans-serif;
-            font-size: 18px;
-            font-weight: 600;
-            color: #1a1a2e;
-        }
-        #tooltip .family {
-            font-family: 'Inter', sans-serif;
-            font-size: 13px;
-            font-weight: 400;
-            color: #6b7a8f;
-            margin-top: 2px;
-        }
-        #tooltip .lineage {
-            font-family: 'Inter', sans-serif;
-            font-size: 12px;
-            font-weight: 400;
-            color: #9aa8b9;
-            margin-top: 8px;
-            border-top: 1px solid #eef2f7;
-            padding-top: 8px;
-        }
-        #tooltip .lineage span {
-            color: #1a1a2e;
-            font-weight: 500;
-        }
-
         #login-overlay {
             position: fixed;
             inset: 0;
@@ -202,107 +132,64 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            backdrop-filter: blur(6px);
-            -webkit-backdrop-filter: blur(6px);
+            backdrop-filter: blur(4px);
         }
         #login-overlay.hidden {
             display: none;
         }
         #login-box {
             background: #ffffff;
-            border-radius: 20px;
-            padding: 48px 40px;
-            min-width: 360px;
-            max-width: 92vw;
+            border-radius: 16px;
+            padding: 40px 36px;
+            min-width: 320px;
+            max-width: 90vw;
             text-align: center;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
         }
-        #login-box .logo {
-            font-size: 40px;
-            margin-bottom: 4px;
-            display: block;
-        }
         #login-box h2 {
-            font-family: 'Inter', sans-serif;
             font-weight: 700;
             color: #1a1a2e;
-            font-size: 26px;
-            letter-spacing: -0.5px;
+            font-size: 24px;
         }
         #login-box .sub {
-            font-family: 'Inter', sans-serif;
-            font-weight: 400;
             color: #6b7a8f;
             font-size: 14px;
-            letter-spacing: 0.3px;
-            margin-bottom: 28px;
-            margin-top: 2px;
+            margin-bottom: 24px;
         }
         #login-box input {
             width: 100%;
-            padding: 14px 18px;
-            border-radius: 10px;
-            border: 1.5px solid #dce3eb;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1px solid #d0d7de;
             background: #f8fafc;
             color: #1a1a2e;
-            font-family: 'Inter', sans-serif;
             font-size: 16px;
-            font-weight: 400;
-            margin-bottom: 16px;
-            outline: none;
             text-align: center;
-            letter-spacing: 2px;
-            transition: 0.2s;
+            letter-spacing: 4px;
+            outline: none;
+            margin-bottom: 16px;
         }
         #login-box input:focus {
             border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
         }
         #login-box button {
             width: 100%;
-            padding: 14px;
+            padding: 12px;
             background: #1a1a2e;
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
             color: #ffffff;
-            font-family: 'Inter', sans-serif;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s;
         }
         #login-box button:hover {
             background: #2d2d4a;
         }
         #login-error {
             color: #dc2626;
-            font-family: 'Inter', sans-serif;
-            font-size: 14px;
-            font-weight: 400;
-            margin-top: 14px;
+            margin-top: 12px;
             display: none;
-        }
-
-        @media (max-width: 768px) {
-            #header { padding: 8px 14px; gap: 8px; }
-            #header h1 { font-size: 16px; }
-            #header h1 span { font-size: 12px; }
-            #searchInput { font-size: 13px; min-width: 80px; padding: 6px 12px; }
-            #familyFilter { font-size: 13px; max-width: 110px; padding: 6px 12px; }
-            .header-btn { font-size: 12px; padding: 6px 12px; }
-            #stats { font-size: 12px; }
-            #login-box { padding: 32px 24px; min-width: unset; width: 92vw; }
-            #login-box h2 { font-size: 22px; }
-            #tooltip { min-width: 160px; padding: 12px 16px; }
-            #tooltip .name { font-size: 16px; }
-        }
-        @media (max-width: 420px) {
-            #header { padding: 4px 8px; gap: 4px; }
-            #header h1 { font-size: 13px; margin-right: 4px; }
-            #searchInput { font-size: 11px; min-width: 50px; padding: 4px 8px; }
-            #familyFilter { font-size: 11px; max-width: 70px; padding: 4px 8px; }
-            .header-btn { font-size: 10px; padding: 4px 8px; }
-            #stats { font-size: 10px; }
         }
     </style>
 </head>
@@ -310,10 +197,9 @@
 
     <div id="login-overlay">
         <div id="login-box">
-            <span class="logo">⚔️</span>
             <h2>Хьачарой</h2>
-            <div class="sub">Генеалогическое древо тейпа</div>
-            <input type="password" id="loginPass" placeholder="······" maxlength="20" autofocus>
+            <div class="sub">Генеалогическое древо</div>
+            <input type="password" id="loginPass" placeholder="Пароль" maxlength="20" autofocus>
             <button onclick="checkLogin()">Войти</button>
             <div id="login-error">Неверный пароль</div>
         </div>
@@ -321,7 +207,7 @@
 
     <div id="header">
         <h1>Хьачарой <span>· тейп</span></h1>
-        <input type="text" id="searchInput" placeholder="Поиск по имени или фамилии..." oninput="searchByName(this.value)">
+        <input type="text" id="searchInput" placeholder="Поиск..." oninput="searchByName(this.value)">
         <select id="familyFilter" onchange="filterByFamily(this.value)">
             <option value="">Все семьи</option>
         </select>
@@ -334,12 +220,6 @@
         <canvas id="treeCanvas"></canvas>
     </div>
 
-    <div id="tooltip">
-        <div class="name" id="tipName">—</div>
-        <div class="family" id="tipFamily">—</div>
-        <div class="lineage" id="tipLineage">—</div>
-    </div>
-
     <script>
         // ============================================================
         // ДАННЫЕ
@@ -348,20 +228,6 @@
             { id: 'root1', name: 'Корень', family: '', fatherId: null }
         ];
 
-        const familyColors = {};
-
-        function getFamilyColor(family) {
-            if (!family) return '#6b7a8f';
-            if (familyColors[family]) return familyColors[family];
-            const palette = ['#2563eb', '#7c3aed', '#0891b2', '#059669', '#d97706', '#dc2626', '#4f46e5', '#0d9488'];
-            const idx = Object.keys(familyColors).length % palette.length;
-            familyColors[family] = palette[idx];
-            return familyColors[family];
-        }
-
-        // ============================================================
-        // СОСТОЯНИЕ
-        // ============================================================
         let highlightIds = new Set();
         let dimFamily = null;
         let scale = 1;
@@ -371,8 +237,8 @@
         let dragStartOffX = 0, dragStartOffY = 0;
         let canvas, ctx;
         let nodePositions = new Map();
-        const NODE_W = 170, NODE_H = 70;
-        const LVL_GAP = 60, NODE_GAP = 20;
+        const NODE_W = 140, NODE_H = 56;
+        const LVL_GAP = 50, NODE_GAP = 16;
 
         let editMode = false;
 
@@ -405,7 +271,7 @@
             setTimeout(() => {
                 centerView();
                 render();
-            }, 150);
+            }, 100);
         }
 
         function resizeCanvas() {
@@ -435,10 +301,10 @@
             const h = canvas.height / (window.devicePixelRatio || 1);
             const treeW = maxX - minX + NODE_W;
             const treeH = maxY - minY + NODE_H;
-            const scaleX = (w - 60) / (treeW + 60);
-            const scaleY = (h - 60) / (treeH + 60);
+            const scaleX = (w - 40) / (treeW + 40);
+            const scaleY = (h - 40) / (treeH + 40);
             scale = Math.min(scaleX, scaleY, 1.2);
-            scale = Math.max(scale, 0.25);
+            scale = Math.max(scale, 0.2);
             offsetX = 0;
             offsetY = 0;
         }
@@ -476,6 +342,16 @@
                 });
             });
             return posMap;
+        }
+
+        function getFamilyColor(family) {
+            if (!family) return '#8a9aaa';
+            const colors = ['#2563eb', '#7c3aed', '#0891b2', '#059669', '#d97706', '#dc2626', '#4f46e5', '#0d9488'];
+            let hash = 0;
+            for (let i = 0; i < family.length; i++) {
+                hash = family.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            return colors[Math.abs(hash) % colors.length];
         }
 
         // ============================================================
@@ -519,8 +395,7 @@
                 ctx.lineTo(from.x + NODE_W / 2, midY);
                 ctx.lineTo(to.x + NODE_W / 2, midY);
                 ctx.lineTo(to.x + NODE_W / 2, to.y);
-
-                ctx.strokeStyle = isHighlight ? '#2563eb' : '#d0d7e0';
+                ctx.strokeStyle = isHighlight ? '#2563eb' : '#c8d0d8';
                 ctx.lineWidth = isHighlight ? 2.5 : 1.5;
                 ctx.stroke();
             });
@@ -538,14 +413,14 @@
                 ctx.globalAlpha = isDim ? 0.2 : 1;
 
                 ctx.fillStyle = isHighlight ? '#eff6ff' : '#ffffff';
-                ctx.strokeStyle = isHighlight ? '#2563eb' : '#dce3eb';
+                ctx.strokeStyle = isHighlight ? '#2563eb' : '#d0d7de';
                 ctx.lineWidth = isHighlight ? 2 : 1.5;
 
-                ctx.shadowColor = isHighlight ? 'rgba(37, 99, 235, 0.15)' : 'rgba(0,0,0,0.04)';
-                ctx.shadowBlur = isHighlight ? 16 : 8;
+                ctx.shadowColor = 'rgba(0,0,0,0.04)';
+                ctx.shadowBlur = 8;
                 ctx.shadowOffsetY = 2;
 
-                roundRect(ctx, x, y, NODE_W, NODE_H, 10);
+                roundRect(ctx, x, y, NODE_W, NODE_H, 8);
                 ctx.fill();
                 ctx.stroke();
 
@@ -554,14 +429,14 @@
 
                 // Имя
                 ctx.fillStyle = '#1a1a2e';
-                ctx.font = '600 16px Inter, sans-serif';
+                ctx.font = 'bold 15px Arial, sans-serif';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
 
                 if (p.family && p.family !== '') {
                     ctx.fillText(p.name, x + NODE_W / 2, y + NODE_H / 2 - 6);
                     ctx.fillStyle = '#2563eb';
-                    ctx.font = '11px Inter, sans-serif';
+                    ctx.font = '11px Arial, sans-serif';
                     ctx.fillText(p.family, x + NODE_W / 2, y + NODE_H / 2 + 16);
                 } else {
                     ctx.fillText(p.name, x + NODE_W / 2, y + NODE_H / 2);
@@ -569,16 +444,14 @@
 
                 // Кнопки в админ-режиме
                 if (editMode) {
-                    // Кнопка "Изменить" — справа сверху
                     ctx.fillStyle = '#2563eb';
-                    ctx.font = '10px Inter, sans-serif';
+                    ctx.font = '10px Arial, sans-serif';
                     ctx.textAlign = 'right';
                     ctx.textBaseline = 'top';
-                    ctx.fillText('✎ Изменить', x + NODE_W - 8, y + 4);
+                    ctx.fillText('✎ Изменить', x + NODE_W - 6, y + 4);
 
-                    // Кнопка "Добавить" — снизу по центру
                     ctx.fillStyle = '#059669';
-                    ctx.font = '10px Inter, sans-serif';
+                    ctx.font = '10px Arial, sans-serif';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'bottom';
                     ctx.fillText('＋ Добавить', x + NODE_W / 2, y + NODE_H - 4);
@@ -734,9 +607,8 @@
             const tx = (mx - w / 2) / scale + cx - offsetX;
             const ty = (my - h / 2) / scale + cy - offsetY;
 
-            // Находим карточку
             let found = null;
-            let minDist = 70;
+            let minDist = 60;
             posMap.forEach((pos, id) => {
                 const dx = pos.x + NODE_W / 2 - tx;
                 const dy = pos.y + NODE_H / 2 - ty;
@@ -749,7 +621,6 @@
 
             if (!found) {
                 highlightIds.clear();
-                document.getElementById('tooltip').style.display = 'none';
                 render();
                 return;
             }
@@ -757,15 +628,14 @@
             const p = people.find(pp => pp.id === found);
             if (!p) return;
 
-            // Если админ-режим включён
             if (editMode) {
                 const pos = posMap.get(found);
                 const localX = (tx - pos.x) / NODE_W;
                 const localY = (ty - pos.y) / NODE_H;
 
-                // Кнопка "Добавить" — снизу по центру (localY ~ 0.85-1.0)
+                // Кнопка "Добавить"
                 if (localY > 0.8 && localX > 0.3 && localX < 0.7) {
-                    const newName = prompt('Добавить сына для "' + p.name + '"\n\nВведите имя:');
+                    const newName = prompt('Добавить сына для "' + p.name + '"\n\nИмя:');
                     if (newName && newName.trim() !== '') {
                         const newId = 'p' + Date.now() + Math.random().toString(36).slice(2, 6);
                         people.push({
@@ -784,13 +654,13 @@
                     return;
                 }
 
-                // Кнопка "Изменить" — справа сверху (localX ~ 0.8-1.0, localY ~ 0.0-0.2)
+                // Кнопка "Изменить"
                 if (localX > 0.7 && localY < 0.25) {
                     const newName = prompt('Редактирование\n\nИмя:', p.name);
                     if (newName !== null && newName.trim() !== '') {
                         p.name = newName.trim();
                     }
-                    const newFamily = prompt('Фамилия (семья)\n\nЕсли фамилии нет — оставь пустым:', p.family);
+                    const newFamily = prompt('Фамилия:', p.family);
                     if (newFamily !== null) {
                         p.family = newFamily.trim();
                     }
@@ -802,8 +672,7 @@
                     return;
                 }
 
-                // Клик по карточке (не по кнопкам) — тултип
-                showTooltip(e.clientX, e.clientY, p);
+                // Обычный клик по карточке
                 highlightIds.clear();
                 let cur = p;
                 while (cur) {
@@ -815,8 +684,7 @@
                 return;
             }
 
-            // Обычный режим — тултип
-            showTooltip(e.clientX, e.clientY, p);
+            // Обычный режим
             highlightIds.clear();
             let cur = p;
             while (cur) {
@@ -825,40 +693,6 @@
                 cur = father;
             }
             render();
-        }
-
-        // ============================================================
-        // ТУЛТИП
-        // ============================================================
-        let tooltipTimeout;
-
-        function showTooltip(clientX, clientY, p) {
-            const tip = document.getElementById('tooltip');
-            document.getElementById('tipName').textContent = p.name;
-            document.getElementById('tipFamily').textContent = p.family || '(без семьи)';
-
-            let chain = [];
-            let cur = p;
-            while (cur) {
-                chain.push(cur.name + (cur.family ? ' (' + cur.family + ')' : ''));
-                const father = people.find(pp => pp.id === cur.fatherId);
-                cur = father;
-            }
-            document.getElementById('tipLineage').innerHTML = 'Предки: <span>' + chain.join(' → ') + '</span>';
-
-            tip.style.display = 'block';
-            let left = clientX + 16;
-            let top = clientY - 10;
-            if (left + 220 > window.innerWidth) left = clientX - 220;
-            if (top + 110 > window.innerHeight) top = window.innerHeight - 120;
-            if (top < 10) top = 10;
-            tip.style.left = left + 'px';
-            tip.style.top = top + 'px';
-
-            clearTimeout(tooltipTimeout);
-            tooltipTimeout = setTimeout(() => {
-                tip.style.display = 'none';
-            }, 4000);
         }
 
         // ============================================================
@@ -899,7 +733,6 @@
             document.getElementById('familyFilter').value = '';
             centerView();
             render();
-            document.getElementById('tooltip').style.display = 'none';
         }
 
         function toggleAdmin() {
@@ -916,7 +749,7 @@
         }
 
         // ============================================================
-        // ХРАНЕНИЕ И ВСПОМОГАТЕЛЬНЫЕ
+        // ХРАНЕНИЕ
         // ============================================================
         function saveToStorage() {
             try { localStorage.setItem('dendro_people', JSON.stringify(people)); } catch (e) {}
@@ -929,7 +762,6 @@
                     const parsed = JSON.parse(data);
                     if (parsed && parsed.length) {
                         people = parsed;
-                        people.forEach(p => getFamilyColor(p.family));
                     }
                 }
             } catch (e) {}
