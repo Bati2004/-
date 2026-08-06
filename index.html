@@ -245,6 +245,7 @@
   var currentFamilyFilter = "all";
   var ancestorHighlight = new Set();
   var searchHighlight = new Set();
+  var familyLineHighlight = new Set();
   var currentAdminTarget = null;
   var dataReady = false;
   var suppressNextRemoteEcho = false;
@@ -468,7 +469,12 @@
     people.forEach(function(p){
       var pos = positions[p.id];
       if(!pos) return;
-      var dimmed = currentFamilyFilter !== 'all' && p.family !== currentFamilyFilter;
+      var dimmed;
+      if(familyLineHighlight.size){
+        dimmed = !familyLineHighlight.has(p.id);
+      } else {
+        dimmed = currentFamilyFilter !== 'all' && p.family !== currentFamilyFilter;
+      }
       ctx.globalAlpha = dimmed ? 0.25 : 1;
 
       var x = pos.x - NODE_W/2, y = pos.y;
@@ -478,6 +484,7 @@
       ctx.fill();
 
       var borderColor = colors.stroke, borderWidth = 1.5;
+      if(familyLineHighlight.has(p.id)){ borderColor = '#2563eb'; borderWidth = 3; }
       if(ancestorHighlight.has(p.id)){ borderColor = '#2563eb'; borderWidth = 3; }
       if(searchHighlight.has(p.id)){ borderColor = '#f59e0b'; borderWidth = 3; }
       ctx.strokeStyle = borderColor;
@@ -525,9 +532,86 @@
     }
   }
 
+  function getAncestorChainIds(id){
+    var chain = [];
+    var cur = peopleById[id];
+    while(cur){
+      chain.unshift(cur.id);
+      cur = cur.fatherId ? peopleById[cur.fatherId] : null;
+    }
+    return chain;
+  }
+
+  function collectDescendants(personId){
+    var result = [];
+    var stack = [personId];
+    while(stack.length){
+      var cur = stack.pop();
+      people.forEach(function(p){
+        if(p.fatherId === cur){
+          result.push(p.id);
+          stack.push(p.id);
+        }
+      });
+    }
+    return result;
+  }
+
+  function zoomToNodeSet(idsSet){
+    var ids = Array.from(idsSet);
+    if(!ids.length) return;
+    var minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    ids.forEach(function(id){
+      var pos = positions[id];
+      if(!pos) return;
+      minX = Math.min(minX, pos.x - NODE_W/2);
+      maxX = Math.max(maxX, pos.x + NODE_W/2);
+      minY = Math.min(minY, pos.y);
+      maxY = Math.max(maxY, pos.y + NODE_H);
+    });
+    if(minX === Infinity) return;
+    var rect = canvasWrap.getBoundingClientRect();
+    var padding = 60;
+    var contentW = Math.max(1, maxX - minX);
+    var contentH = Math.max(1, maxY - minY);
+    var scaleX = (rect.width - padding*2) / contentW;
+    var scaleY = (rect.height - padding*2) / contentH;
+    var newScale = Math.min(scaleX, scaleY, MAX_SCALE);
+    newScale = Math.max(newScale, MIN_SCALE);
+    scale = newScale;
+    var midX = (minX + maxX) / 2, midY = (minY + maxY) / 2;
+    offsetX = rect.width/2 - midX*scale;
+    offsetY = rect.height/2 - midY*scale;
+  }
+
+  function findFamilyLineIds(query){
+    var q = query.trim().toLowerCase();
+    if(!q) return null;
+    var familyMatches = people.filter(function(p){
+      return p.family && p.family.toLowerCase().indexOf(q) !== -1;
+    });
+    if(!familyMatches.length) return null;
+
+    var chains = familyMatches.map(function(p){ return getAncestorChainIds(p.id); });
+    var minLen = Math.min.apply(null, chains.map(function(c){ return c.length; }));
+    var lcaIndex = 0;
+    for(var i = 0; i < minLen; i++){
+      var idAtI = chains[0][i];
+      var allMatch = chains.every(function(c){ return c[i] === idAtI; });
+      if(allMatch) lcaIndex = i; else break;
+    }
+    var lcaId = chains[0][lcaIndex];
+
+    var result = new Set();
+    result.add(lcaId);
+    collectDescendants(lcaId).forEach(function(id){ result.add(id); });
+    return result;
+  }
+
   searchInput.addEventListener('input', function(){
     var q = searchInput.value.trim().toLowerCase();
     searchHighlight.clear();
+    familyLineHighlight.clear();
     if(q){
       people.forEach(function(p){
         if(p.name.toLowerCase().indexOf(q) !== -1 ||
@@ -535,6 +619,11 @@
           searchHighlight.add(p.id);
         }
       });
+      var lineIds = findFamilyLineIds(q);
+      if(lineIds){
+        familyLineHighlight = lineIds;
+        zoomToNodeSet(familyLineHighlight);
+      }
     }
     draw();
   });
@@ -547,6 +636,7 @@
   // ---------- Selection / admin ----------
 
   function selectPerson(person){
+    familyLineHighlight.clear();
     ancestorHighlight.clear();
     var cur = person;
     while(cur){
@@ -594,21 +684,6 @@
     draw();
     pushDataToServer();
   });
-
-  function collectDescendants(personId){
-    var result = [];
-    var stack = [personId];
-    while(stack.length){
-      var cur = stack.pop();
-      people.forEach(function(p){
-        if(p.fatherId === cur){
-          result.push(p.id);
-          stack.push(p.id);
-        }
-      });
-    }
-    return result;
-  }
 
   btnDelete.addEventListener('click', function(){
     if(!currentAdminTarget) return;
