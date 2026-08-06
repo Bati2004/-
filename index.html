@@ -64,7 +64,6 @@
   button.secondary { border-color: #d1d5db; color: #374151; }
   button.secondary:hover { background: #f3f4f6; }
   button.danger { border-color: #dc2626; color: #dc2626; }
-  button:disabled { opacity: 0.5; cursor: default; }
 
   #canvasWrap {
     flex: 1 1 auto;
@@ -141,20 +140,6 @@
     pointer-events: none;
   }
 
-  #syncStatus {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    font-size: 11px;
-    color: #6b7280;
-    background: rgba(255,255,255,0.9);
-    padding: 4px 8px;
-    border-radius: 6px;
-    pointer-events: none;
-  }
-  #syncStatus.error { color: #dc2626; }
-  #syncStatus.ok { color: #059669; }
-
   @media (max-width: 640px) {
     header h1 { display: none; }
     #searchInput { width: 130px; }
@@ -169,17 +154,16 @@
   <select id="familyFilter"><option value="all">Все семьи</option></select>
   <div class="spacer"></div>
   <button id="exportPdfBtn">Экспорт PDF</button>
-  <button id="adminBtn" disabled>Загрузка...</button>
+  <button id="adminBtn">Админ</button>
 </header>
 
 <div id="canvasWrap">
   <canvas id="treeCanvas"></canvas>
   <div id="legend">Колесо / щипок — масштаб. Перетаскивание — перемещение. Клик по карточке — предки.</div>
-  <div id="syncStatus">Подключение...</div>
 </div>
 
 <!-- Login overlay -->
-<div class="overlay" id="loginOverlay">
+<div class="overlay show" id="loginOverlay">
   <div class="box">
     <h2>Вход</h2>
     <input type="password" id="passwordInput" placeholder="Пароль администратора">
@@ -205,30 +189,15 @@
   </div>
 </div>
 
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<!-- jsPDF (для векторного экспорта в PDF) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
 (function(){
   "use strict";
 
-  // ===================================================================
-  // 1) ВСТАВЬТЕ СЮДА СВОЙ firebaseConfig ИЗ КОНСОЛИ FIREBASE
-  // ===================================================================
-  var firebaseConfig = {
-    apiKey: "ВАШ_API_KEY",
-    authDomain: "ВАШ_ПРОЕКТ.firebaseapp.com",
-    databaseURL: "https://ВАШ_ПРОЕКТ-default-rtdb.firebaseio.com",
-    projectId: "ВАШ_ПРОЕКТ",
-    storageBucket: "ВАШ_ПРОЕКТ.appspot.com",
-    messagingSenderId: "ХХХХХХХХ",
-    appId: "1:ХХХХХХХХ:web:ХХХХХХХХ"
-  };
-  // ===================================================================
-
   var ADMIN_PASSWORD = "admin2026";
+  var STORAGE_KEY = "khacharoyTreeData";
 
   var DEFAULT_DATA = [
     { id: 'root1', name: 'Корень', family: '', fatherId: null }
@@ -247,13 +216,10 @@
   var searchHighlight = new Set();
   var familyLineHighlight = new Set();
   var currentAdminTarget = null;
-  var dataReady = false;
-  var suppressNextRemoteEcho = false;
 
   var canvas = document.getElementById('treeCanvas');
   var ctx = canvas.getContext('2d');
   var canvasWrap = document.getElementById('canvasWrap');
-  var syncStatus = document.getElementById('syncStatus');
 
   var loginOverlay = document.getElementById('loginOverlay');
   var passwordInput = document.getElementById('passwordInput');
@@ -273,59 +239,24 @@
   var searchInput = document.getElementById('searchInput');
   var familyFilter = document.getElementById('familyFilter');
 
-  // ---------- Firebase ----------
+  // ---------- Data (localStorage) ----------
 
-  var db = null;
-  var treeRef = null;
-
-  function initFirebase(){
+  function loadData(){
     try {
-      firebase.initializeApp(firebaseConfig);
-      db = firebase.database();
-      treeRef = db.ref('treeData');
-    } catch(e){
-      setSyncStatus('Ошибка конфигурации Firebase', true);
-      console.error(e);
-      return;
-    }
-
-    treeRef.on('value', function(snapshot){
-      var val = snapshot.val();
-      if(val === null){
-        // База пуста — инициализируем стартовыми данными
-        treeRef.set(DEFAULT_DATA).catch(function(e){
-          setSyncStatus('Ошибка записи в базу', true);
-        });
-        return;
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if(raw){
+        var parsed = JSON.parse(raw);
+        if(Array.isArray(parsed) && parsed.length){
+          people = parsed;
+          return;
+        }
       }
-      people = Array.isArray(val) ? val.filter(Boolean) : Object.keys(val).map(function(k){ return val[k]; });
-      dataReady = true;
-      rebuild();
-      if(offsetX === 0 && offsetY === 0) centerView();
-      draw();
-      setSyncStatus('Синхронизировано', false);
-      adminBtn.disabled = false;
-      adminBtn.textContent = isAdmin ? 'Админ: вкл' : 'Админ';
-    }, function(err){
-      setSyncStatus('Нет соединения с базой', true);
-      console.error(err);
-    });
+    } catch(e){}
+    people = JSON.parse(JSON.stringify(DEFAULT_DATA));
   }
 
-  function setSyncStatus(text, isError){
-    syncStatus.textContent = text;
-    syncStatus.className = isError ? 'error' : 'ok';
-  }
-
-  function pushDataToServer(){
-    if(!treeRef) return;
-    setSyncStatus('Сохранение...', false);
-    treeRef.set(people).then(function(){
-      setSyncStatus('Синхронизировано', false);
-    }).catch(function(e){
-      setSyncStatus('Ошибка сохранения', true);
-      console.error(e);
-    });
+  function saveData(){
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(people)); } catch(e){}
   }
 
   function refreshIndex(){
@@ -371,6 +302,7 @@
     refreshIndex();
     positions = buildLayout();
     populateFamilyFilter();
+    draw();
   }
 
   function centerView(){
@@ -436,15 +368,6 @@
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     var rect = canvasWrap.getBoundingClientRect();
     ctx.clearRect(0, 0, rect.width, rect.height);
-
-    if(!dataReady){
-      ctx.fillStyle = '#9ca3af';
-      ctx.font = '14px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText('Загрузка данных...', rect.width/2, rect.height/2);
-      return;
-    }
-
     ctx.save();
     ctx.translate(offsetX, offsetY);
     ctx.scale(scale, scale);
@@ -667,10 +590,9 @@
     if(newFamily === null) return;
     currentAdminTarget.name = newName.trim();
     currentAdminTarget.family = newFamily.trim();
+    saveData();
     closeAdminDialog();
     rebuild();
-    draw();
-    pushDataToServer();
   });
 
   btnAddSon.addEventListener('click', function(){
@@ -679,10 +601,9 @@
     if(!newName || !newName.trim()) return;
     var newId = 'p' + Date.now() + Math.floor(Math.random()*1000);
     people.push({ id: newId, name: newName.trim(), family: '', fatherId: currentAdminTarget.id });
+    saveData();
     closeAdminDialog();
     rebuild();
-    draw();
-    pushDataToServer();
   });
 
   btnDelete.addEventListener('click', function(){
@@ -699,14 +620,12 @@
     people = people.filter(function(p){ return !idsToRemove[p.id]; });
     ancestorHighlight.clear();
     searchHighlight.clear();
+    saveData();
     closeAdminDialog();
     rebuild();
-    draw();
-    pushDataToServer();
   });
 
   function handleTap(clientX, clientY){
-    if(!dataReady) return;
     var rect = canvasWrap.getBoundingClientRect();
     var sx = clientX - rect.left, sy = clientY - rect.top;
     var wx = (sx - offsetX) / scale, wy = (sy - offsetY) / scale;
@@ -905,11 +824,9 @@
   }
 
   function exportTreeToPDF(){
-    if(!dataReady){ alert('Данные ещё не загружены, подождите секунду.'); return; }
-    if(!window.jspdf){ alert('Библиотека PDF ещё не загрузилась, попробуйте ещё раз.'); return; }
-
     var ids = Object.keys(positions);
     if(!ids.length) return;
+    if(!window.jspdf){ alert('Библиотека PDF ещё не загрузилась, попробуйте ещё раз.'); return; }
 
     var minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
     ids.forEach(function(id){
@@ -1000,9 +917,13 @@
 
   window.addEventListener('resize', resizeCanvas);
 
+  loadData();
+  rebuild();
   resizeCanvas();
+  centerView();
+  draw();
   updateAdminButton();
-  initFirebase();
+  showLogin();
 
 })();
 </script>
