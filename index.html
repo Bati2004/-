@@ -4,10 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Генеалогическое древо тейпа Хьачарой</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js">
-</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js">
-</script>
 <style>
   * { box-sizing: border-box; }
   html, body {
@@ -68,14 +64,7 @@
   button.secondary { border-color: #d1d5db; color: #374151; }
   button.secondary:hover { background: #f3f4f6; }
   button.danger { border-color: #dc2626; color: #dc2626; }
-  button.danger-bg { background: #dc2626; color: #fff; border-color: #dc2626; }
-  button.danger-bg:hover { background: #b91c1c; }
-  button.pdf-btn {
-    background: #dc2626;
-    color: #fff;
-    border-color: #dc2626;
-  }
-  button.pdf-btn:hover { background: #b91c1c; }
+  button:disabled { opacity: 0.5; cursor: default; }
 
   #canvasWrap {
     flex: 1 1 auto;
@@ -139,8 +128,6 @@
     margin: 0 0 18px 0;
   }
   #adminModal .box .row { flex-direction: column; }
-  #adminModal .box .row .btn-row { display: flex; gap: 8px; width: 100%; }
-  #adminModal .box .row .btn-row button { flex: 1; }
 
   #legend {
     position: absolute;
@@ -154,23 +141,23 @@
     pointer-events: none;
   }
 
+  #syncStatus {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 11px;
+    color: #6b7280;
+    background: rgba(255,255,255,0.9);
+    padding: 4px 8px;
+    border-radius: 6px;
+    pointer-events: none;
+  }
+  #syncStatus.error { color: #dc2626; }
+  #syncStatus.ok { color: #059669; }
+
   @media (max-width: 640px) {
-    header {
-      flex-wrap: nowrap;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      gap: 6px;
-      padding: 8px 10px;
-    }
-    header h1 { font-size: 13px; margin-right: 0; flex-shrink: 0; }
-    #searchInput { width: 100px; min-width: 80px; font-size: 12px; padding: 5px 8px; }
-    #familyFilter { min-width: 80px; font-size: 12px; padding: 5px 8px; }
-    button { font-size: 11px; padding: 5px 8px; white-space: nowrap; flex-shrink: 0; }
-    .spacer { display: none; }
-    #stats { display: none; }
-    #legend { font-size: 9px; bottom: 4px; left: 4px; padding: 2px 6px; }
-    #adminModal .box { padding: 16px; }
-    #adminModal .box .row .btn-row { flex-direction: column; }
+    header h1 { display: none; }
+    #searchInput { width: 130px; }
   }
 </style>
 </head>
@@ -181,17 +168,18 @@
   <input type="text" id="searchInput" placeholder="Поиск по имени / фамилии">
   <select id="familyFilter"><option value="all">Все семьи</option></select>
   <div class="spacer"></div>
-  <button id="adminBtn">Админ</button>
-  <button class="pdf-btn" id="pdfBtn">📄 PDF</button>
+  <button id="exportPdfBtn">Экспорт PDF</button>
+  <button id="adminBtn" disabled>Загрузка...</button>
 </header>
 
 <div id="canvasWrap">
   <canvas id="treeCanvas"></canvas>
   <div id="legend">Колесо / щипок — масштаб. Перетаскивание — перемещение. Клик по карточке — предки.</div>
+  <div id="syncStatus">Подключение...</div>
 </div>
 
 <!-- Login overlay -->
-<div class="overlay show" id="loginOverlay">
+<div class="overlay" id="loginOverlay">
   <div class="box">
     <h2>Вход</h2>
     <input type="password" id="passwordInput" placeholder="Пароль администратора">
@@ -209,24 +197,38 @@
     <h2>Действие</h2>
     <p class="name" id="adminModalName"></p>
     <div class="row">
-      <div class="btn-row">
-        <button class="secondary" id="btnEdit">✎ Изменить</button>
-        <button class="secondary" id="btnAddSon">＋ Сын</button>
-      </div>
-      <div class="btn-row">
-        <button class="danger-bg" id="btnDelete">✕ Удалить</button>
-        <button class="secondary" id="btnCloseAdmin">Отмена</button>
-      </div>
+      <button class="secondary" id="btnEdit">Изменить</button>
+      <button class="secondary" id="btnAddSon">Добавить сына</button>
+      <button class="danger" id="btnDelete">Удалить</button>
+      <button class="secondary" id="btnCloseAdmin">Отмена</button>
     </div>
   </div>
 </div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
 (function(){
   "use strict";
 
+  // ===================================================================
+  // 1) ВСТАВЬТЕ СЮДА СВОЙ firebaseConfig ИЗ КОНСОЛИ FIREBASE
+  // ===================================================================
+  var firebaseConfig = {
+    apiKey: "ВАШ_API_KEY",
+    authDomain: "ВАШ_ПРОЕКТ.firebaseapp.com",
+    databaseURL: "https://ВАШ_ПРОЕКТ-default-rtdb.firebaseio.com",
+    projectId: "ВАШ_ПРОЕКТ",
+    storageBucket: "ВАШ_ПРОЕКТ.appspot.com",
+    messagingSenderId: "ХХХХХХХХ",
+    appId: "1:ХХХХХХХХ:web:ХХХХХХХХ"
+  };
+  // ===================================================================
+
   var ADMIN_PASSWORD = "admin2026";
-  var STORAGE_KEY = "khacharoyTreeData";
 
   var DEFAULT_DATA = [
     { id: 'root1', name: 'Корень', family: '', fatherId: null }
@@ -244,10 +246,13 @@
   var ancestorHighlight = new Set();
   var searchHighlight = new Set();
   var currentAdminTarget = null;
+  var dataReady = false;
+  var suppressNextRemoteEcho = false;
 
   var canvas = document.getElementById('treeCanvas');
   var ctx = canvas.getContext('2d');
   var canvasWrap = document.getElementById('canvasWrap');
+  var syncStatus = document.getElementById('syncStatus');
 
   var loginOverlay = document.getElementById('loginOverlay');
   var passwordInput = document.getElementById('passwordInput');
@@ -260,144 +265,66 @@
   var adminModalName = document.getElementById('adminModalName');
   var btnEdit = document.getElementById('btnEdit');
   var btnAddSon = document.getElementById('btnAddSon');
-  var btnDelete = document.getElementById('btnDelete');
   var btnCloseAdmin = document.getElementById('btnCloseAdmin');
+  var btnDelete = document.getElementById('btnDelete');
+  var exportPdfBtn = document.getElementById('exportPdfBtn');
 
   var searchInput = document.getElementById('searchInput');
   var familyFilter = document.getElementById('familyFilter');
 
-  // ============================================================
-  // PDF ЭКСПОРТ
-  // ============================================================
-  var pdfBtn = document.getElementById('pdfBtn');
+  // ---------- Firebase ----------
 
-  pdfBtn.addEventListener('click', function(){
-    pdfBtn.textContent = '⏳ Генерация...';
-    pdfBtn.disabled = true;
+  var db = null;
+  var treeRef = null;
 
-    var currentScale = scale;
-    var currentOffsetX = offsetX;
-    var currentOffsetY = offsetY;
-
-    centerViewFull();
-    draw();
-
-    setTimeout(function(){
-      var wrapper = canvasWrap;
-
-      html2canvas(wrapper, {
-        scale: 2.5,
-        useCORS: true,
-        backgroundColor: '#ffffff',
-        logging: false,
-        width: wrapper.scrollWidth,
-        height: wrapper.scrollHeight,
-        onclone: function(documentClone) {
-          var legend = documentClone.getElementById('legend');
-          if (legend) legend.style.display = 'none';
-        }
-      }).then(function(canvasImg){
-        scale = currentScale;
-        offsetX = currentOffsetX;
-        offsetY = currentOffsetY;
-        draw();
-
-        var imgWidth = canvasImg.width;
-        var imgHeight = canvasImg.height;
-
-        var orientation = imgWidth > imgHeight ? 'landscape' : 'portrait';
-
-        var maxWidth = 1200;
-        var maxHeight = 1600;
-        var ratio = Math.min(maxWidth / imgWidth, maxHeight / imgHeight, 1);
-        var pdfWidth = imgWidth * ratio;
-        var pdfHeight = imgHeight * ratio;
-
-        var doc = new jspdf.jsPDF({
-          orientation: orientation,
-          unit: 'px',
-          format: [pdfWidth + 80, pdfHeight + 80]
-        });
-
-        var marginX = 40;
-        var marginY = 40;
-
-        doc.addImage(
-          canvasImg.toDataURL('image/png', 1.0),
-          'PNG',
-          marginX,
-          marginY,
-          pdfWidth,
-          pdfHeight
-        );
-
-        doc.setFontSize(14);
-        doc.setTextColor('#111827');
-        doc.text('Генеалогическое древо тейпа Хьачарой', marginX + 10, marginY - 10);
-
-        doc.save('derevo_tejpa_hacharoj.pdf');
-
-        pdfBtn.textContent = '📄 PDF';
-        pdfBtn.disabled = false;
-
-      }).catch(function(err){
-        alert('Ошибка при создании PDF: ' + err);
-        scale = currentScale;
-        offsetX = currentOffsetX;
-        offsetY = currentOffsetY;
-        draw();
-        pdfBtn.textContent = '📄 PDF';
-        pdfBtn.disabled = false;
-      });
-    }, 300);
-  });
-
-  function centerViewFull(){
-    var xs = Object.keys(positions).map(function(id){ return positions[id].x; });
-    var ys = Object.keys(positions).map(function(id){ return positions[id].y; });
-    if(!xs.length || !ys.length) return;
-
-    var minX = Math.min.apply(null, xs);
-    var maxX = Math.max.apply(null, xs);
-    var minY = Math.min.apply(null, ys);
-    var maxY = Math.max.apply(null, ys);
-
-    var treeWidth = maxX - minX + NODE_W + 40;
-    var treeHeight = maxY - minY + NODE_H + 40;
-
-    var rect = canvasWrap.getBoundingClientRect();
-    var scaleX = (rect.width - 20) / treeWidth;
-    var scaleY = (rect.height - 20) / treeHeight;
-
-    var newScale = Math.min(scaleX, scaleY, 1.5);
-    newScale = Math.max(newScale, 0.2);
-
-    var midX = (minX + maxX) / 2;
-    var midY = (minY + maxY) / 2;
-
-    scale = newScale;
-    offsetX = rect.width / 2 - midX * scale;
-    offsetY = rect.height / 2 - midY * scale;
-  }
-
-  // ---------- Data ----------
-
-  function loadData(){
+  function initFirebase(){
     try {
-      var raw = localStorage.getItem(STORAGE_KEY);
-      if(raw){
-        var parsed = JSON.parse(raw);
-        if(Array.isArray(parsed) && parsed.length){
-          people = parsed;
-          return;
-        }
+      firebase.initializeApp(firebaseConfig);
+      db = firebase.database();
+      treeRef = db.ref('treeData');
+    } catch(e){
+      setSyncStatus('Ошибка конфигурации Firebase', true);
+      console.error(e);
+      return;
+    }
+
+    treeRef.on('value', function(snapshot){
+      var val = snapshot.val();
+      if(val === null){
+        // База пуста — инициализируем стартовыми данными
+        treeRef.set(DEFAULT_DATA).catch(function(e){
+          setSyncStatus('Ошибка записи в базу', true);
+        });
+        return;
       }
-    } catch(e){}
-    people = JSON.parse(JSON.stringify(DEFAULT_DATA));
+      people = Array.isArray(val) ? val.filter(Boolean) : Object.keys(val).map(function(k){ return val[k]; });
+      dataReady = true;
+      rebuild();
+      if(offsetX === 0 && offsetY === 0) centerView();
+      draw();
+      setSyncStatus('Синхронизировано', false);
+      adminBtn.disabled = false;
+      adminBtn.textContent = isAdmin ? 'Админ: вкл' : 'Админ';
+    }, function(err){
+      setSyncStatus('Нет соединения с базой', true);
+      console.error(err);
+    });
   }
 
-  function saveData(){
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(people)); } catch(e){}
+  function setSyncStatus(text, isError){
+    syncStatus.textContent = text;
+    syncStatus.className = isError ? 'error' : 'ok';
+  }
+
+  function pushDataToServer(){
+    if(!treeRef) return;
+    setSyncStatus('Сохранение...', false);
+    treeRef.set(people).then(function(){
+      setSyncStatus('Синхронизировано', false);
+    }).catch(function(e){
+      setSyncStatus('Ошибка сохранения', true);
+      console.error(e);
+    });
   }
 
   function refreshIndex(){
@@ -443,7 +370,6 @@
     refreshIndex();
     positions = buildLayout();
     populateFamilyFilter();
-    draw();
   }
 
   function centerView(){
@@ -509,10 +435,20 @@
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     var rect = canvasWrap.getBoundingClientRect();
     ctx.clearRect(0, 0, rect.width, rect.height);
+
+    if(!dataReady){
+      ctx.fillStyle = '#9ca3af';
+      ctx.font = '14px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('Загрузка данных...', rect.width/2, rect.height/2);
+      return;
+    }
+
     ctx.save();
     ctx.translate(offsetX, offsetY);
     ctx.scale(scale, scale);
 
+    // edges
     ctx.strokeStyle = '#cbd5e1';
     ctx.lineWidth = 1.5;
     people.forEach(function(p){
@@ -528,6 +464,7 @@
       }
     });
 
+    // nodes
     people.forEach(function(p){
       var pos = positions[p.id];
       if(!pos) return;
@@ -621,7 +558,7 @@
 
   function openAdminDialog(person){
     currentAdminTarget = person;
-    adminModalName.textContent = person.name + (person.family ? ' (' + person.family + ')' : '');
+    adminModalName.textContent = person.name + (person.family ? ' ' + person.family : '');
     adminModal.classList.add('show');
   }
 
@@ -640,9 +577,10 @@
     if(newFamily === null) return;
     currentAdminTarget.name = newName.trim();
     currentAdminTarget.family = newFamily.trim();
-    saveData();
     closeAdminDialog();
     rebuild();
+    draw();
+    pushDataToServer();
   });
 
   btnAddSon.addEventListener('click', function(){
@@ -651,51 +589,49 @@
     if(!newName || !newName.trim()) return;
     var newId = 'p' + Date.now() + Math.floor(Math.random()*1000);
     people.push({ id: newId, name: newName.trim(), family: '', fatherId: currentAdminTarget.id });
-    saveData();
     closeAdminDialog();
     rebuild();
+    draw();
+    pushDataToServer();
   });
 
-  // ============================================================
-  // УДАЛЕНИЕ КАРТОЧКИ
-  // ============================================================
+  function collectDescendants(personId){
+    var result = [];
+    var stack = [personId];
+    while(stack.length){
+      var cur = stack.pop();
+      people.forEach(function(p){
+        if(p.fatherId === cur){
+          result.push(p.id);
+          stack.push(p.id);
+        }
+      });
+    }
+    return result;
+  }
+
   btnDelete.addEventListener('click', function(){
     if(!currentAdminTarget) return;
-
-    var name = currentAdminTarget.name;
-    var family = currentAdminTarget.family ? ' (' + currentAdminTarget.family + ')' : '';
-
-    // Проверяем, есть ли у этого человека дети
-    var hasChildren = people.some(function(p){ return p.fatherId === currentAdminTarget.id; });
-
-    var msg = 'Удалить "' + name + family + '"?';
-    if(hasChildren){
-      msg += '\n\n⚠️ ВНИМАНИЕ! У этого человека есть сыновья. Если удалить его, его сыновья останутся без отца (их fatherId станет пустым).';
-    }
-    msg += '\n\nНажми "ОК" для удаления или "Отмена" для отмены.';
-
+    var target = currentAdminTarget;
+    var descendants = collectDescendants(target.id);
+    var msg = descendants.length
+      ? 'У "' + target.name + '" есть потомки (' + descendants.length + ' чел.). Удалить его вместе со всеми потомками?'
+      : 'Удалить "' + target.name + '"?';
     if(!confirm(msg)) return;
-
-    // Удаляем человека
-    var index = people.indexOf(currentAdminTarget);
-    if(index !== -1) {
-      people.splice(index, 1);
-    }
-
-    // У всех его детей убираем fatherId (делаем их корнями)
-    people.forEach(function(p){
-      if(p.fatherId === currentAdminTarget.id){
-        p.fatherId = null;
-      }
-    });
-
-    saveData();
+    var idsToRemove = {};
+    idsToRemove[target.id] = true;
+    descendants.forEach(function(id){ idsToRemove[id] = true; });
+    people = people.filter(function(p){ return !idsToRemove[p.id]; });
+    ancestorHighlight.clear();
+    searchHighlight.clear();
     closeAdminDialog();
     rebuild();
-    alert('✅ "' + name + '" удалён!');
+    draw();
+    pushDataToServer();
   });
 
   function handleTap(clientX, clientY){
+    if(!dataReady) return;
     var rect = canvasWrap.getBoundingClientRect();
     var sx = clientX - rect.left, sy = clientY - rect.top;
     var wx = (sx - offsetX) / scale, wy = (sy - offsetY) / scale;
@@ -855,17 +791,143 @@
     }
   }, { passive: true });
 
+  // ---------- PDF export (vector, not a screenshot) ----------
+
+  function parseColorToRgb(str){
+    if(str.indexOf('hsl') === 0){
+      var m = str.match(/hsl\(([\d.]+),\s*([\d.]+)%,\s*([\d.]+)%\)/);
+      if(m) return hslToRgb(parseFloat(m[1]), parseFloat(m[2])/100, parseFloat(m[3])/100);
+    }
+    if(str[0] === '#'){
+      var hex = str.substring(1);
+      if(hex.length === 3) hex = hex.split('').map(function(c){ return c+c; }).join('');
+      var num = parseInt(hex, 16);
+      return [(num>>16)&255, (num>>8)&255, num&255];
+    }
+    return [200,200,200];
+  }
+
+  function hslToRgb(h, s, l){
+    h = h/360;
+    var r, g, b;
+    if(s === 0){ r = g = b = l; }
+    else {
+      var hue2rgb = function(p, q, t){
+        if(t < 0) t += 1;
+        if(t > 1) t -= 1;
+        if(t < 1/6) return p + (q-p)*6*t;
+        if(t < 1/2) return q;
+        if(t < 2/3) return p + (q-p)*(2/3-t)*6;
+        return p;
+      };
+      var q = l < 0.5 ? l*(1+s) : l+s-l*s;
+      var p = 2*l - q;
+      r = hue2rgb(p, q, h+1/3);
+      g = hue2rgb(p, q, h);
+      b = hue2rgb(p, q, h-1/3);
+    }
+    return [Math.round(r*255), Math.round(g*255), Math.round(b*255)];
+  }
+
+  function exportTreeToPDF(){
+    if(!dataReady){ alert('Данные ещё не загружены, подождите секунду.'); return; }
+    if(!window.jspdf){ alert('Библиотека PDF ещё не загрузилась, попробуйте ещё раз.'); return; }
+
+    var ids = Object.keys(positions);
+    if(!ids.length) return;
+
+    var minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    ids.forEach(function(id){
+      var p = positions[id];
+      minX = Math.min(minX, p.x - NODE_W/2);
+      maxX = Math.max(maxX, p.x + NODE_W/2);
+      minY = Math.min(minY, p.y);
+      maxY = Math.max(maxY, p.y + NODE_H);
+    });
+
+    var margin = 40;
+    var PT_PER_UNIT = 0.7;
+    var MAX_DIM = 14000; // безопасный предел размера страницы PDF
+
+    var contentW = (maxX - minX) * PT_PER_UNIT;
+    var contentH = (maxY - minY) * PT_PER_UNIT;
+    if(contentW + margin*2 > MAX_DIM || contentH + margin*2 > MAX_DIM){
+      var shrink = Math.min((MAX_DIM - margin*2) / contentW, (MAX_DIM - margin*2) / contentH);
+      PT_PER_UNIT *= shrink;
+      contentW = (maxX - minX) * PT_PER_UNIT;
+      contentH = (maxY - minY) * PT_PER_UNIT;
+    }
+
+    var pageW = contentW + margin*2;
+    var pageH = contentH + margin*2;
+
+    var jsPDFCtor = window.jspdf.jsPDF;
+    var pdf = new jsPDFCtor({
+      orientation: pageW >= pageH ? 'landscape' : 'portrait',
+      unit: 'pt',
+      format: [pageW, pageH]
+    });
+
+    function tx(x){ return (x - minX) * PT_PER_UNIT + margin; }
+    function ty(y){ return (y - minY) * PT_PER_UNIT + margin; }
+
+    // рёбра (связи родитель-потомок)
+    pdf.setDrawColor(180, 190, 200);
+    pdf.setLineWidth(1);
+    people.forEach(function(p){
+      if(p.fatherId && positions[p.fatherId] && positions[p.id]){
+        var a = positions[p.fatherId], b = positions[p.id];
+        var midY = a.y + NODE_H + (LEVEL_GAP_Y - NODE_H) / 2;
+        pdf.line(tx(a.x), ty(a.y + NODE_H), tx(a.x), ty(midY));
+        pdf.line(tx(a.x), ty(midY), tx(b.x), ty(midY));
+        pdf.line(tx(b.x), ty(midY), tx(b.x), ty(b.y));
+      }
+    });
+
+    var nodeWPt = NODE_W * PT_PER_UNIT;
+    var nodeHPt = NODE_H * PT_PER_UNIT;
+    var nameFontSize = Math.max(4, 11 * (PT_PER_UNIT/0.7));
+    var familyFontSize = Math.max(3, 8 * (PT_PER_UNIT/0.7));
+
+    people.forEach(function(p){
+      var pos = positions[p.id];
+      if(!pos) return;
+      var x = tx(pos.x - NODE_W/2), y = ty(pos.y);
+      var colors = familyColor(p.family);
+      var fillRgb = parseColorToRgb(colors.fill);
+      var strokeRgb = parseColorToRgb(colors.stroke);
+
+      pdf.setFillColor(fillRgb[0], fillRgb[1], fillRgb[2]);
+      pdf.setDrawColor(strokeRgb[0], strokeRgb[1], strokeRgb[2]);
+      pdf.setLineWidth(1);
+      pdf.roundedRect(x, y, nodeWPt, nodeHPt, 4, 4, 'FD');
+
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(nameFontSize);
+      pdf.setTextColor(17, 24, 39);
+      var nameY = p.family ? (y + nodeHPt/2 - nodeHPt*0.14) : (y + nodeHPt/2);
+      pdf.text(p.name, x + nodeWPt/2, nameY, { align: 'center', baseline: 'middle' });
+
+      if(p.family){
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(familyFontSize);
+        pdf.setTextColor(107, 114, 128);
+        pdf.text(p.family, x + nodeWPt/2, y + nodeHPt/2 + nodeHPt*0.22, { align: 'center', baseline: 'middle' });
+      }
+    });
+
+    pdf.save('khacharoy-tree.pdf');
+  }
+
+  exportPdfBtn.addEventListener('click', exportTreeToPDF);
+
   // ---------- Init ----------
 
   window.addEventListener('resize', resizeCanvas);
 
-  loadData();
-  rebuild();
   resizeCanvas();
-  centerView();
-  draw();
   updateAdminButton();
-  showLogin();
+  initFirebase();
 
 })();
 </script>
