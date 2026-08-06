@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Генеалогическое древо тейпа Хьачарой</title>
+<!-- Подключаем библиотеки для PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js">
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js">
+</script>
 <style>
   * { box-sizing: border-box; }
   html, body {
@@ -64,6 +69,12 @@
   button.secondary { border-color: #d1d5db; color: #374151; }
   button.secondary:hover { background: #f3f4f6; }
   button.danger { border-color: #dc2626; color: #dc2626; }
+  button.pdf-btn {
+    background: #dc2626;
+    color: #fff;
+    border-color: #dc2626;
+  }
+  button.pdf-btn:hover { background: #b91c1c; }
 
   #canvasWrap {
     flex: 1 1 auto;
@@ -154,6 +165,7 @@
   <select id="familyFilter"><option value="all">Все семьи</option></select>
   <div class="spacer"></div>
   <button id="adminBtn">Админ</button>
+  <button class="pdf-btn" id="pdfBtn">📄 PDF</button>
 </header>
 
 <div id="canvasWrap">
@@ -230,6 +242,139 @@
 
   var searchInput = document.getElementById('searchInput');
   var familyFilter = document.getElementById('familyFilter');
+
+  // ============================================================
+  // PDF ЭКСПОРТ — С ПОДДЕРЖКОЙ БОЛЬШИХ ДАННЫХ
+  // ============================================================
+  var pdfBtn = document.getElementById('pdfBtn');
+
+  pdfBtn.addEventListener('click', function(){
+    // Показываем уведомление о начале генерации
+    pdfBtn.textContent = '⏳ Генерация...';
+    pdfBtn.disabled = true;
+
+    // Сохраняем текущий вид
+    var currentScale = scale;
+    var currentOffsetX = offsetX;
+    var currentOffsetY = offsetY;
+
+    // Временно центрируем и масштабируем для полного обзора
+    centerViewFull();
+
+    // Перерисовываем с новым масштабом
+    draw();
+
+    // Ждём отрисовки и делаем скриншот
+    setTimeout(function(){
+      var wrapper = canvasWrap;
+
+      html2canvas(wrapper, {
+        scale: 2.5,  // Высокое качество для печати
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+        width: wrapper.scrollWidth,
+        height: wrapper.scrollHeight,
+        onclone: function(documentClone) {
+          // Убираем легенду на скриншоте
+          var legend = documentClone.getElementById('legend');
+          if (legend) legend.style.display = 'none';
+        }
+      }).then(function(canvasImg){
+        // Возвращаем прежний вид
+        scale = currentScale;
+        offsetX = currentOffsetX;
+        offsetY = currentOffsetY;
+        draw();
+
+        // Создаём PDF
+        var imgWidth = canvasImg.width;
+        var imgHeight = canvasImg.height;
+
+        // Выбираем ориентацию в зависимости от пропорций
+        var orientation = imgWidth > imgHeight ? 'landscape' : 'portrait';
+
+        // Рассчитываем размер страницы с учётом масштаба
+        var maxWidth = 1200;
+        var maxHeight = 1600;
+        var ratio = Math.min(maxWidth / imgWidth, maxHeight / imgHeight, 1);
+        var pdfWidth = imgWidth * ratio;
+        var pdfHeight = imgHeight * ratio;
+
+        var doc = new jspdf.jsPDF({
+          orientation: orientation,
+          unit: 'px',
+          format: [pdfWidth + 80, pdfHeight + 80]
+        });
+
+        // Добавляем небольшой отступ
+        var marginX = 40;
+        var marginY = 40;
+
+        doc.addImage(
+          canvasImg.toDataURL('image/png', 1.0),
+          'PNG',
+          marginX,
+          marginY,
+          pdfWidth,
+          pdfHeight
+        );
+
+        // Добавляем заголовок сверху
+        doc.setFontSize(14);
+        doc.setTextColor('#111827');
+        doc.text('Генеалогическое древо тейпа Хьачарой', marginX + 10, marginY - 10);
+
+        // Сохраняем
+        doc.save('derevo_tejpa_hacharoj.pdf');
+
+        // Возвращаем кнопку в исходное состояние
+        pdfBtn.textContent = '📄 PDF';
+        pdfBtn.disabled = false;
+
+      }).catch(function(err){
+        alert('Ошибка при создании PDF: ' + err);
+        // Возвращаем вид
+        scale = currentScale;
+        offsetX = currentOffsetX;
+        offsetY = currentOffsetY;
+        draw();
+        pdfBtn.textContent = '📄 PDF';
+        pdfBtn.disabled = false;
+      });
+    }, 300);
+  });
+
+  // Функция для полного центрирования дерева
+  function centerViewFull(){
+    var xs = Object.keys(positions).map(function(id){ return positions[id].x; });
+    var ys = Object.keys(positions).map(function(id){ return positions[id].y; });
+    if(!xs.length || !ys.length) return;
+
+    var minX = Math.min.apply(null, xs);
+    var maxX = Math.max.apply(null, xs);
+    var minY = Math.min.apply(null, ys);
+    var maxY = Math.max.apply(null, ys);
+
+    var treeWidth = maxX - minX + NODE_W + 40;
+    var treeHeight = maxY - minY + NODE_H + 40;
+
+    var rect = canvasWrap.getBoundingClientRect();
+    var scaleX = (rect.width - 20) / treeWidth;
+    var scaleY = (rect.height - 20) / treeHeight;
+
+    // Масштабируем так, чтобы дерево поместилось, но не слишком мелко
+    var newScale = Math.min(scaleX, scaleY, 1.5);
+    newScale = Math.max(newScale, 0.2);
+
+    // Центрируем
+    var midX = (minX + maxX) / 2;
+    var midY = (minY + maxY) / 2;
+
+    scale = newScale;
+    offsetX = rect.width / 2 - midX * scale;
+    offsetY = rect.height / 2 - midY * scale;
+  }
 
   // ---------- Data ----------
 
