@@ -79,6 +79,8 @@
     cursor: grab;
   }
   canvas.dragging { cursor: grabbing; }
+  canvas.admin-mode { cursor: default; }
+  canvas.admin-mode:hover { cursor: default; }
 
   .overlay {
     position: fixed; inset: 0;
@@ -155,11 +157,12 @@
   <div class="spacer"></div>
   <button id="exportPdfBtn">Экспорт PDF</button>
   <button id="adminBtn">Админ</button>
+  <button id="resetLayoutBtn" style="display:none;border-color:#f59e0b;color:#f59e0b;">Сбросить расположение</button>
 </header>
 
 <div id="canvasWrap">
   <canvas id="treeCanvas"></canvas>
-  <div id="legend">Колесо / щипок — масштаб. Перетаскивание — перемещение. Клик по карточке — предки.</div>
+  <div id="legend">Колесо / щипок — масштаб. Перетаскивание — перемещение. Клик по карточке — предки. В режиме админа: перетаскивайте карточки!</div>
 </div>
 
 <!-- Login overlay -->
@@ -198,6 +201,7 @@
 
   var ADMIN_PASSWORD = "admin2026";
   var STORAGE_KEY = "khacharoyTreeData";
+  var POSITIONS_STORAGE_KEY = "khacharoyTreePositions";
 
   var DEFAULT_DATA = [
     { id: 'root1', name: 'Корень', family: '', fatherId: null }
@@ -209,6 +213,7 @@
   var people = [];
   var peopleById = {};
   var positions = {};
+  var manualPositions = {}; // Сохранённые вручную позиции
   var scale = 1, offsetX = 0, offsetY = 0;
   var isAdmin = false;
   var currentFamilyFilter = "all";
@@ -216,6 +221,11 @@
   var searchHighlight = new Set();
   var familyLineHighlight = new Set();
   var currentAdminTarget = null;
+
+  // Для перетаскивания узлов в режиме админа
+  var draggingNodeId = null;
+  var dragNodeStartPos = null;
+  var dragStartMouse = null;
 
   var canvas = document.getElementById('treeCanvas');
   var ctx = canvas.getContext('2d');
@@ -227,6 +237,7 @@
   var loginBtn = document.getElementById('loginBtn');
   var guestBtn = document.getElementById('guestBtn');
   var adminBtn = document.getElementById('adminBtn');
+  var resetLayoutBtn = document.getElementById('resetLayoutBtn');
 
   var adminModal = document.getElementById('adminModal');
   var adminModalName = document.getElementById('adminModalName');
@@ -257,6 +268,27 @@
 
   function saveData(){
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(people)); } catch(e){}
+  }
+
+  function loadManualPositions(){
+    try {
+      var raw = localStorage.getItem(POSITIONS_STORAGE_KEY);
+      if(raw){
+        manualPositions = JSON.parse(raw);
+        return;
+      }
+    } catch(e){}
+    manualPositions = {};
+  }
+
+  function saveManualPositions(){
+    try { localStorage.setItem(POSITIONS_STORAGE_KEY, JSON.stringify(manualPositions)); } catch(e){}
+  }
+
+  function clearManualPositions(){
+    manualPositions = {};
+    try { localStorage.removeItem(POSITIONS_STORAGE_KEY); } catch(e){}
+    rebuild();
   }
 
   function refreshIndex(){
@@ -298,9 +330,28 @@
     return pos;
   }
 
+  function applyManualPositions(autoPositions){
+    var result = {};
+    for(var id in autoPositions){
+      if(manualPositions[id]){
+        result[id] = { x: manualPositions[id].x, y: manualPositions[id].y };
+      } else {
+        result[id] = { x: autoPositions[id].x, y: autoPositions[id].y };
+      }
+    }
+    // Удаляем сохранённые позиции для несуществующих узлов
+    var cleaned = {};
+    for(var mid in manualPositions){
+      if(autoPositions[mid]) cleaned[mid] = manualPositions[mid];
+    }
+    manualPositions = cleaned;
+    return result;
+  }
+
   function rebuild(){
     refreshIndex();
-    positions = buildLayout();
+    var autoPos = buildLayout();
+    positions = applyManualPositions(autoPos);
     populateFamilyFilter();
     draw();
   }
@@ -407,6 +458,12 @@
       ctx.fill();
 
       var borderColor = colors.stroke, borderWidth = 1.5;
+      if(draggingNodeId === p.id){
+        borderColor = '#2563eb';
+        borderWidth = 3;
+        ctx.shadowColor = 'rgba(37, 99, 235, 0.3)';
+        ctx.shadowBlur = 12;
+      }
       if(familyLineHighlight.has(p.id)){ borderColor = '#2563eb'; borderWidth = 3; }
       if(ancestorHighlight.has(p.id)){ borderColor = '#2563eb'; borderWidth = 3; }
       if(searchHighlight.has(p.id)){ borderColor = '#f59e0b'; borderWidth = 3; }
@@ -414,6 +471,8 @@
       ctx.lineWidth = borderWidth;
       roundRect(ctx, x, y, NODE_W, NODE_H, 8);
       ctx.stroke();
+      ctx.shadowColor = 'transparent';
+      ctx.shadowBlur = 0;
 
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
@@ -427,6 +486,14 @@
         ctx.fillStyle = '#6b7280';
         ctx.fillText(truncate(ctx, p.family, NODE_W - 16), pos.x, pos.y + NODE_H/2 + 11);
       }
+
+      // В режиме админа показываем подсказку
+      if(isAdmin){
+        ctx.fillStyle = '#2563eb';
+        ctx.font = '400 8px Arial';
+        ctx.fillText('↕', pos.x + NODE_W/2 - 12, pos.y + 10);
+      }
+
       ctx.globalAlpha = 1;
     });
 
@@ -618,83 +685,72 @@
     idsToRemove[target.id] = true;
     descendants.forEach(function(id){ idsToRemove[id] = true; });
     people = people.filter(function(p){ return !idsToRemove[p.id]; });
+    // Удаляем также сохранённые позиции
+    for(var id in idsToRemove){
+      delete manualPositions[id];
+    }
     ancestorHighlight.clear();
     searchHighlight.clear();
     saveData();
+    saveManualPositions();
     closeAdminDialog();
     rebuild();
   });
 
-  function handleTap(clientX, clientY){
+  function getNodeAtScreenPoint(clientX, clientY){
     var rect = canvasWrap.getBoundingClientRect();
     var sx = clientX - rect.left, sy = clientY - rect.top;
     var wx = (sx - offsetX) / scale, wy = (sy - offsetY) / scale;
-    var hit = null;
     for(var id in positions){
       var pos = positions[id];
       var left = pos.x - NODE_W/2, top = pos.y;
       if(wx >= left && wx <= left + NODE_W && wy >= top && wy <= top + NODE_H){
-        hit = peopleById[id];
-        break;
+        return { id: id, person: peopleById[id] };
       }
     }
+    return null;
+  }
+
+  function handleTap(clientX, clientY){
+    var hit = getNodeAtScreenPoint(clientX, clientY);
     if(!hit) return;
-    if(isAdmin){ openAdminDialog(hit); } else { selectPerson(hit); }
+    if(isAdmin){ openAdminDialog(hit.person); } else { selectPerson(hit.person); }
   }
 
-  // ---------- Login ----------
-
-  function showLogin(){
-    loginOverlay.classList.add('show');
-    loginError.textContent = '';
-    passwordInput.value = '';
-    passwordInput.focus();
-  }
-  function hideLogin(){ loginOverlay.classList.remove('show'); }
-
-  function updateAdminButton(){
-    adminBtn.textContent = isAdmin ? 'Админ: вкл' : 'Админ';
-    adminBtn.classList.toggle('active', isAdmin);
-  }
-
-  loginBtn.addEventListener('click', function(){
-    if(passwordInput.value === ADMIN_PASSWORD){
-      isAdmin = true;
-      updateAdminButton();
-      hideLogin();
-    } else {
-      loginError.textContent = 'Неверный пароль';
-    }
-  });
-  passwordInput.addEventListener('keydown', function(e){
-    if(e.key === 'Enter') loginBtn.click();
-  });
-  guestBtn.addEventListener('click', function(){
-    isAdmin = false;
-    updateAdminButton();
-    hideLogin();
-  });
-  adminBtn.addEventListener('click', function(){
-    if(isAdmin){
-      isAdmin = false;
-      updateAdminButton();
-    } else {
-      showLogin();
-    }
-  });
-
-  // ---------- Pan / zoom (mouse) ----------
-
-  var isDragging = false, dragMoved = false;
-  var mouseDownPos = {x:0,y:0}, lastMouse = {x:0,y:0};
+  // ---------- Node dragging (admin mode) ----------
 
   canvas.addEventListener('mousedown', function(e){
+    if(isAdmin){
+      // Проверяем, попали ли в узел
+      var hit = getNodeAtScreenPoint(e.clientX, e.clientY);
+      if(hit){
+        draggingNodeId = hit.id;
+        dragNodeStartPos = { x: positions[hit.id].x, y: positions[hit.id].y };
+        dragStartMouse = { x: e.clientX, y: e.clientY };
+        canvas.style.cursor = 'grabbing';
+        e.stopPropagation();
+        return;
+      }
+    }
+    // Обычное перетаскивание холста
     isDragging = true; dragMoved = false;
     lastMouse.x = e.clientX; lastMouse.y = e.clientY;
     mouseDownPos.x = e.clientX; mouseDownPos.y = e.clientY;
     canvas.classList.add('dragging');
   });
+
   window.addEventListener('mousemove', function(e){
+    if(draggingNodeId){
+      // Перетаскиваем узел
+      var dx = e.clientX - dragStartMouse.x;
+      var dy = e.clientY - dragStartMouse.y;
+      var newX = dragNodeStartPos.x + dx / scale;
+      var newY = dragNodeStartPos.y + dy / scale;
+      positions[draggingNodeId].x = newX;
+      positions[draggingNodeId].y = newY;
+      draw();
+      return;
+    }
     if(!isDragging) return;
     var dx = e.clientX - lastMouse.x, dy = e.clientY - lastMouse.y;
     if(Math.abs(e.clientX - mouseDownPos.x) > 4 || Math.abs(e.clientY - mouseDownPos.y) > 4) dragMoved = true;
@@ -702,7 +758,22 @@
     lastMouse.x = e.clientX; lastMouse.y = e.clientY;
     draw();
   });
+
   window.addEventListener('mouseup', function(e){
+    if(draggingNodeId){
+      // Сохраняем новую позицию
+      manualPositions[draggingNodeId] = {
+        x: positions[draggingNodeId].x,
+        y: positions[draggingNodeId].y
+      };
+      saveManualPositions();
+      draggingNodeId = null;
+      dragNodeStartPos = null;
+      dragStartMouse = null;
+      canvas.style.cursor = '';
+      draw();
+      return;
+    }
     if(isDragging && !dragMoved){
       handleTap(e.clientX, e.clientY);
     }
@@ -785,6 +856,70 @@
     }
   }, { passive: true });
 
+  // ---------- Login ----------
+
+  function showLogin(){
+    loginOverlay.classList.add('show');
+    loginError.textContent = '';
+    passwordInput.value = '';
+    passwordInput.focus();
+  }
+  function hideLogin(){ loginOverlay.classList.remove('show'); }
+
+  function updateAdminButton(){
+    adminBtn.textContent = isAdmin ? 'Админ: вкл' : 'Админ';
+    adminBtn.classList.toggle('active', isAdmin);
+    resetLayoutBtn.style.display = isAdmin ? '' : 'none';
+    if(isAdmin){
+      canvas.classList.add('admin-mode');
+    } else {
+      canvas.classList.remove('admin-mode');
+      draggingNodeId = null;
+    }
+  }
+
+  loginBtn.addEventListener('click', function(){
+    if(passwordInput.value === ADMIN_PASSWORD){
+      isAdmin = true;
+      updateAdminButton();
+      hideLogin();
+      draw();
+    } else {
+      loginError.textContent = 'Неверный пароль';
+    }
+  });
+  passwordInput.addEventListener('keydown', function(e){
+    if(e.key === 'Enter') loginBtn.click();
+  });
+  guestBtn.addEventListener('click', function(){
+    isAdmin = false;
+    updateAdminButton();
+    hideLogin();
+    draw();
+  });
+  adminBtn.addEventListener('click', function(){
+    if(isAdmin){
+      isAdmin = false;
+      updateAdminButton();
+      draw();
+    } else {
+      showLogin();
+    }
+  });
+
+  // ---------- Pan / zoom (mouse) ----------
+
+  var isDragging = false, dragMoved = false;
+  var mouseDownPos = {x:0,y:0}, lastMouse = {x:0,y:0};
+
+  // ---------- Reset layout ----------
+
+  resetLayoutBtn.addEventListener('click', function(){
+    if(confirm('Сбросить ручное расположение всех карточек? Позиции вернутся к автоматическим.')){
+      clearManualPositions();
+    }
+  });
+
   // ---------- PDF export (vector, not a screenshot) ----------
 
   function parseColorToRgb(str){
@@ -843,7 +978,6 @@
   var cyrillicFontReady = false;
 
   function embedCyrillicFont(pdf){
-    // ИСПРАВЛЕННЫЕ URL для загрузки шрифта Roboto с поддержкой кириллицы
     var regularUrl = 'https://cdn.jsdelivr.net/gh/google/fonts@latest/ofl/roboto/Roboto-Regular.ttf';
     var boldUrl = 'https://cdn.jsdelivr.net/gh/google/fonts@latest/ofl/roboto/Roboto-Bold.ttf';
     
@@ -881,7 +1015,7 @@
 
     var margin = 40;
     var PT_PER_UNIT = 0.7;
-    var MAX_DIM = 14000; // безопасный предел размера страницы PDF
+    var MAX_DIM = 14000;
 
     var contentW = (maxX - minX) * PT_PER_UNIT;
     var contentH = (maxY - minY) * PT_PER_UNIT;
@@ -916,7 +1050,6 @@
     function tx(x){ return (x - minX) * PT_PER_UNIT + margin; }
     function ty(y){ return (y - minY) * PT_PER_UNIT + margin; }
 
-    // рёбра (связи родитель-потомок)
     pdf.setDrawColor(180, 190, 200);
     pdf.setLineWidth(1);
     people.forEach(function(p){
@@ -969,6 +1102,7 @@
   window.addEventListener('resize', resizeCanvas);
 
   loadData();
+  loadManualPositions();
   rebuild();
   resizeCanvas();
   centerView();
