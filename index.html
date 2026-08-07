@@ -690,7 +690,26 @@
     if(!newName || !newName.trim()) return;
     var newId = 'p' + Date.now() + Math.floor(Math.random()*1000);
     people.push({ id: newId, name: newName.trim(), family: '', fatherId: currentAdminTarget.id });
+    
+    // Устанавливаем позицию нового сына прямо под отцом
+    var fatherPos = positions[currentAdminTarget.id];
+    if(fatherPos){
+      // Считаем, сколько уже есть сыновей у этого отца
+      var sonsCount = 0;
+      people.forEach(function(p){
+        if(p.fatherId === currentAdminTarget.id) sonsCount++;
+      });
+      
+      // Размещаем нового сына под отцом, со смещением вправо если уже есть сыновья
+      var offsetXSon = (sonsCount - 1) * (NODE_W + NODE_GAP_X);
+      manualPositions[newId] = {
+        x: fatherPos.x + offsetXSon,
+        y: fatherPos.y + LEVEL_GAP_Y
+      };
+    }
+    
     saveData();
+    saveManualPositions();
     closeAdminDialog();
     rebuild();
   });
@@ -824,18 +843,15 @@
     if(e.touches.length === 1){
       var touch = e.touches[0];
       
-      // Проверяем, попали ли в узел
       var hit = getNodeAtScreenPoint(touch.clientX, touch.clientY);
       
       if(isAdmin && hit){
-        // Режим админа: запоминаем узел для возможного перетаскивания
         touchNodeDrag.active = true;
         touchNodeDrag.nodeId = hit.id;
         touchNodeDrag.startPos = { x: positions[hit.id].x, y: positions[hit.id].y };
         touchNodeDrag.startTouch = { x: touch.clientX, y: touch.clientY };
         touchNodeDrag.started = false;
         
-        // Запускаем таймер: если держать больше 400мс - начинаем перетаскивание
         clearTimeout(touchNodeDrag.timer);
         touchNodeDrag.timer = setTimeout(function(){
           touchNodeDrag.started = true;
@@ -850,7 +866,6 @@
       }
       
       if(!isAdmin && hit){
-        // Гостевой режим: запоминаем для тапа
         touchTapNode = hit;
         touchDragging = true; 
         touchMoved = false;
@@ -861,7 +876,6 @@
         return;
       }
       
-      // Пустое место - двигаем холст
       touchTapNode = null;
       touchDragging = true; 
       touchMoved = false; 
@@ -871,7 +885,6 @@
       touchStart.x = touchLast.x = touch.clientX;
       touchStart.y = touchLast.y = touch.clientY;
     } else if(e.touches.length === 2){
-      // Два пальца - зум
       touchDragging = false; 
       pinching = true;
       touchNodeDrag.active = false;
@@ -887,7 +900,6 @@
   canvas.addEventListener('touchmove', function(e){
     e.preventDefault();
     
-    // Перетаскивание узла
     if(touchNodeDrag.active && touchNodeDrag.started && e.touches.length === 1){
       var touch = e.touches[0];
       var dx = touch.clientX - touchNodeDrag.startTouch.x;
@@ -900,13 +912,11 @@
       return;
     }
     
-    // Если ещё не начали перетаскивание, но палец сдвинулся - отменяем таймер
     if(touchNodeDrag.active && !touchNodeDrag.started && e.touches.length === 1){
       var touch = e.touches[0];
       var dx = Math.abs(touch.clientX - touchNodeDrag.startTouch.x);
       var dy = Math.abs(touch.clientY - touchNodeDrag.startTouch.y);
       if(dx > 5 || dy > 5){
-        // Начали движение - отменяем тап
         touchTapNode = null;
       }
     }
@@ -935,7 +945,6 @@
   }, { passive: false });
 
   canvas.addEventListener('touchend', function(e){
-    // Завершение перетаскивания узла
     if(touchNodeDrag.active && touchNodeDrag.started && touchNodeDrag.nodeId){
       manualPositions[touchNodeDrag.nodeId] = {
         x: positions[touchNodeDrag.nodeId].x,
@@ -952,7 +961,6 @@
       return;
     }
     
-    // Тап по узлу (если не было перетаскивания)
     if(touchNodeDrag.active && !touchNodeDrag.started && touchTapNode){
       clearTimeout(touchNodeDrag.timer);
       touchNodeDrag.active = false;
@@ -968,7 +976,6 @@
       return;
     }
     
-    // Очищаем
     touchNodeDrag.active = false;
     touchNodeDrag.nodeId = null;
     touchNodeDrag.started = false;
