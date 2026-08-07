@@ -823,10 +823,50 @@
     return [Math.round(r*255), Math.round(g*255), Math.round(b*255)];
   }
 
+  function fetchFontAsBase64(url){
+    return fetch(url)
+      .then(function(res){
+        if(!res.ok) throw new Error('Не удалось загрузить шрифт: ' + url);
+        return res.arrayBuffer();
+      })
+      .then(function(buf){
+        var bytes = new Uint8Array(buf);
+        var binary = '';
+        var chunk = 8192;
+        for(var i = 0; i < bytes.length; i += chunk){
+          binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+        }
+        return btoa(binary);
+      });
+  }
+
+  var cyrillicFontReady = false;
+
+  function embedCyrillicFont(pdf){
+    var regularUrl = 'https://cdn.jsdelivr.net/gh/google/fonts@main/apache/roboto/static/Roboto-Regular.ttf';
+    var boldUrl = 'https://cdn.jsdelivr.net/gh/google/fonts@main/apache/roboto/static/Roboto-Bold.ttf';
+    return Promise.all([fetchFontAsBase64(regularUrl), fetchFontAsBase64(boldUrl)])
+      .then(function(results){
+        pdf.addFileToVFS('Roboto-Regular.ttf', results[0]);
+        pdf.addFont('Roboto-Regular.ttf', 'Roboto', 'normal');
+        pdf.addFileToVFS('Roboto-Bold.ttf', results[1]);
+        pdf.addFont('Roboto-Bold.ttf', 'Roboto', 'bold');
+        cyrillicFontReady = true;
+      })
+      .catch(function(err){
+        console.error('Не удалось загрузить кириллический шрифт, будет использован стандартный (без кириллицы):', err);
+        cyrillicFontReady = false;
+      });
+  }
+
   function exportTreeToPDF(){
     var ids = Object.keys(positions);
     if(!ids.length) return;
     if(!window.jspdf){ alert('Библиотека PDF ещё не загрузилась, попробуйте ещё раз.'); return; }
+
+    exportPdfBtn.disabled = true;
+    var originalLabel = exportPdfBtn.textContent;
+    exportPdfBtn.textContent = 'Готовим PDF...';
 
     var minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
     ids.forEach(function(id){
@@ -859,6 +899,17 @@
       unit: 'pt',
       format: [pageW, pageH]
     });
+
+    embedCyrillicFont(pdf).then(function(){
+      drawPeopleIntoPdf(pdf, minX, minY, PT_PER_UNIT, margin);
+      pdf.save('khacharoy-tree.pdf');
+      exportPdfBtn.disabled = false;
+      exportPdfBtn.textContent = originalLabel;
+    });
+  }
+
+  function drawPeopleIntoPdf(pdf, minX, minY, PT_PER_UNIT, margin){
+    var fontFamily = cyrillicFontReady ? 'Roboto' : 'helvetica';
 
     function tx(x){ return (x - minX) * PT_PER_UNIT + margin; }
     function ty(y){ return (y - minY) * PT_PER_UNIT + margin; }
@@ -894,21 +945,19 @@
       pdf.setLineWidth(1);
       pdf.roundedRect(x, y, nodeWPt, nodeHPt, 4, 4, 'FD');
 
-      pdf.setFont('helvetica', 'bold');
+      pdf.setFont(fontFamily, 'bold');
       pdf.setFontSize(nameFontSize);
       pdf.setTextColor(17, 24, 39);
       var nameY = p.family ? (y + nodeHPt/2 - nodeHPt*0.14) : (y + nodeHPt/2);
       pdf.text(p.name, x + nodeWPt/2, nameY, { align: 'center', baseline: 'middle' });
 
       if(p.family){
-        pdf.setFont('helvetica', 'normal');
+        pdf.setFont(fontFamily, 'normal');
         pdf.setFontSize(familyFontSize);
         pdf.setTextColor(107, 114, 128);
         pdf.text(p.family, x + nodeWPt/2, y + nodeHPt/2 + nodeHPt*0.22, { align: 'center', baseline: 'middle' });
       }
     });
-
-    pdf.save('khacharoy-tree.pdf');
   }
 
   exportPdfBtn.addEventListener('click', exportTreeToPDF);
