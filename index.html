@@ -843,8 +843,10 @@
   var cyrillicFontReady = false;
 
   function embedCyrillicFont(pdf){
-    var regularUrl = 'https://cdn.jsdelivr.net/gh/google/fonts@main/apache/roboto/static/Roboto-Regular.ttf';
-    var boldUrl = 'https://cdn.jsdelivr.net/gh/google/fonts@main/apache/roboto/static/Roboto-Bold.ttf';
+    // ИСПРАВЛЕННЫЕ URL для загрузки шрифта Roboto с поддержкой кириллицы
+    var regularUrl = 'https://cdn.jsdelivr.net/gh/google/fonts@latest/ofl/roboto/Roboto-Regular.ttf';
+    var boldUrl = 'https://cdn.jsdelivr.net/gh/google/fonts@latest/ofl/roboto/Roboto-Bold.ttf';
+    
     return Promise.all([fetchFontAsBase64(regularUrl), fetchFontAsBase64(boldUrl)])
       .then(function(results){
         pdf.addFileToVFS('Roboto-Regular.ttf', results[0]);
