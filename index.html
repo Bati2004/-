@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Генеалогическое древо тейпа Хьачарой</title>
+<title>&#1043;&#1077;&#1085;&#1077;&#1072;&#1083;&#1086;&#1075;&#1080;&#1095;&#1077;&#1089;&#1082;&#1086;&#1077; &#1076;&#1088;&#1077;&#1074;&#1086; &#1090;&#1077;&#1081;&#1087;&#1072; &#1061;&#1100;&#1072;&#1095;&#1072;&#1088;&#1086;&#1081;</title>
 <style>
   * { box-sizing: border-box; }
   html, body {
@@ -149,29 +149,29 @@
 <body>
 
 <header>
-  <h1>Тейп Хьачарой</h1>
-  <input type="text" id="searchInput" placeholder="Поиск по имени / фамилии">
-  <select id="familyFilter"><option value="all">Все семьи</option></select>
+  <h1>&#1058;&#1077;&#1081;&#1087; &#1061;&#1100;&#1072;&#1095;&#1072;&#1088;&#1086;&#1081;</h1>
+  <input type="text" id="searchInput" placeholder="&#1055;&#1086;&#1080;&#1089;&#1082; &#1087;&#1086; &#1080;&#1084;&#1077;&#1085;&#1080; / &#1092;&#1072;&#1084;&#1080;&#1083;&#1080;&#1080;">
+  <select id="familyFilter"><option value="all">&#1042;&#1089;&#1077; &#1089;&#1077;&#1084;&#1100;&#1080;</option></select>
   <div class="spacer"></div>
-  <button id="backupBtn">Резервная копия</button>
-  <button id="exportPdfBtn">Экспорт PDF</button>
-  <button id="adminBtn">Админ</button>
+  <button id="backupBtn">&#1056;&#1077;&#1079;&#1077;&#1088;&#1074;&#1085;&#1072;&#1103; &#1082;&#1086;&#1087;&#1080;&#1103;</button>
+  <button id="exportPdfBtn">&#1069;&#1082;&#1089;&#1087;&#1086;&#1088;&#1090; PDF</button>
+  <button id="adminBtn">&#1040;&#1076;&#1084;&#1080;&#1085;</button>
 </header>
 
 <div id="canvasWrap">
   <canvas id="treeCanvas"></canvas>
-  <div id="legend">Колесо / щипок — масштаб. Перетаскивание — перемещение. Клик по карточке — предки.</div>
+  <div id="legend">&#1050;&#1086;&#1083;&#1077;&#1089;&#1086; / &#1097;&#1080;&#1087;&#1086;&#1082; &#8212; &#1084;&#1072;&#1089;&#1096;&#1090;&#1072;&#1073;. &#1055;&#1077;&#1088;&#1077;&#1090;&#1072;&#1089;&#1082;&#1080;&#1074;&#1072;&#1085;&#1080;&#1077; &#8212; &#1087;&#1077;&#1088;&#1077;&#1084;&#1077;&#1097;&#1077;&#1085;&#1080;&#1077;. &#1050;&#1083;&#1080;&#1082; &#1087;&#1086; &#1082;&#1072;&#1088;&#1090;&#1086;&#1095;&#1082;&#1077; &#8212; &#1087;&#1088;&#1077;&#1076;&#1082;&#1080;.</div>
 </div>
 
 <!-- Login overlay -->
 <div class="overlay show" id="loginOverlay">
   <div class="box">
-    <h2>Вход</h2>
-    <input type="password" id="passwordInput" placeholder="Пароль администратора">
+    <h2>&#1042;&#1093;&#1086;&#1076;</h2>
+    <input type="password" id="passwordInput" placeholder="&#1055;&#1072;&#1088;&#1086;&#1083;&#1100; &#1072;&#1076;&#1084;&#1080;&#1085;&#1080;&#1089;&#1090;&#1088;&#1072;&#1090;&#1086;&#1088;&#1072;">
     <p class="err" id="loginError"></p>
     <div class="row">
-      <button class="secondary" id="guestBtn">Как гость</button>
-      <button class="primary" id="loginBtn">Войти</button>
+      <button class="secondary" id="guestBtn">&#1050;&#1072;&#1082; &#1075;&#1086;&#1089;&#1090;&#1100;</button>
+      <button class="primary" id="loginBtn">&#1042;&#1086;&#1081;&#1090;&#1080;</button>
     </div>
   </div>
 </div>
@@ -179,13 +179,13 @@
 <!-- Admin action modal -->
 <div class="overlay" id="adminModal">
   <div class="box">
-    <h2>Действие</h2>
+    <h2>&#1044;&#1077;&#1081;&#1089;&#1090;&#1074;&#1080;&#1077;</h2>
     <p class="name" id="adminModalName"></p>
     <div class="row">
-      <button class="secondary" id="btnEdit">Изменить</button>
-      <button class="secondary" id="btnAddSon">Добавить сына</button>
-      <button class="danger" id="btnDelete">Удалить</button>
-      <button class="secondary" id="btnCloseAdmin">Отмена</button>
+      <button class="secondary" id="btnEdit">&#1048;&#1079;&#1084;&#1077;&#1085;&#1080;&#1090;&#1100;</button>
+      <button class="secondary" id="btnAddSon">&#1044;&#1086;&#1073;&#1072;&#1074;&#1080;&#1090;&#1100; &#1089;&#1099;&#1085;&#1072;</button>
+      <button class="danger" id="btnDelete">&#1059;&#1076;&#1072;&#1083;&#1080;&#1090;&#1100;</button>
+      <button class="secondary" id="btnCloseAdmin">&#1054;&#1090;&#1084;&#1077;&#1085;&#1072;</button>
     </div>
   </div>
 </div>
@@ -193,26 +193,26 @@
 <!-- Backup / restore modal -->
 <div class="overlay" id="backupModal">
   <div class="box" style="max-width: 480px;">
-    <h2 id="backupTitle">Резервная копия данных</h2>
+    <h2 id="backupTitle">&#1056;&#1077;&#1079;&#1077;&#1088;&#1074;&#1085;&#1072;&#1103; &#1082;&#1086;&#1087;&#1080;&#1103; &#1076;&#1072;&#1085;&#1085;&#1099;&#1093;</h2>
     <p style="font-size:12px;color:#6b7280;margin:0 0 10px 0;">
-      Это ваши текущие данные из памяти браузера в виде текста (JSON). Если здесь буквы читаются нормально — данные целы. Скопируйте или скачайте этот текст себе в надёжное место (например, в заметки), прежде чем что-либо менять на сайте.
+      &#1069;&#1090;&#1086; &#1074;&#1072;&#1096;&#1080; &#1090;&#1077;&#1082;&#1091;&#1097;&#1080;&#1077; &#1076;&#1072;&#1085;&#1085;&#1099;&#1077; &#1080;&#1079; &#1087;&#1072;&#1084;&#1103;&#1090;&#1080; &#1073;&#1088;&#1072;&#1091;&#1079;&#1077;&#1088;&#1072; &#1074; &#1074;&#1080;&#1076;&#1077; &#1090;&#1077;&#1082;&#1089;&#1090;&#1072; (JSON). &#1045;&#1089;&#1083;&#1080; &#1079;&#1076;&#1077;&#1089;&#1100; &#1073;&#1091;&#1082;&#1074;&#1099; &#1095;&#1080;&#1090;&#1072;&#1102;&#1090;&#1089;&#1103; &#1085;&#1086;&#1088;&#1084;&#1072;&#1083;&#1100;&#1085;&#1086; &#8212; &#1076;&#1072;&#1085;&#1085;&#1099;&#1077; &#1094;&#1077;&#1083;&#1099;. &#1057;&#1082;&#1086;&#1087;&#1080;&#1088;&#1091;&#1081;&#1090;&#1077; &#1080;&#1083;&#1080; &#1089;&#1082;&#1072;&#1095;&#1072;&#1081;&#1090;&#1077; &#1101;&#1090;&#1086;&#1090; &#1090;&#1077;&#1082;&#1089;&#1090; &#1089;&#1077;&#1073;&#1077; &#1074; &#1085;&#1072;&#1076;&#1105;&#1078;&#1085;&#1086;&#1077; &#1084;&#1077;&#1089;&#1090;&#1086; (&#1085;&#1072;&#1087;&#1088;&#1080;&#1084;&#1077;&#1088;, &#1074; &#1079;&#1072;&#1084;&#1077;&#1090;&#1082;&#1080;), &#1087;&#1088;&#1077;&#1078;&#1076;&#1077; &#1095;&#1077;&#1084; &#1095;&#1090;&#1086;-&#1083;&#1080;&#1073;&#1086; &#1084;&#1077;&#1085;&#1103;&#1090;&#1100; &#1085;&#1072; &#1089;&#1072;&#1081;&#1090;&#1077;.
     </p>
     <textarea id="backupTextarea" style="width:100%; height:220px; font-family:monospace; font-size:12px; border:1px solid #d1d5db; border-radius:6px; padding:8px; resize:vertical;"></textarea>
     <p class="err" id="backupError"></p>
     <div class="row">
-      <button class="secondary" id="btnCopyBackup">Скопировать</button>
-      <button class="secondary" id="btnDownloadBackup">Скачать файл</button>
+      <button class="secondary" id="btnCopyBackup">&#1057;&#1082;&#1086;&#1087;&#1080;&#1088;&#1086;&#1074;&#1072;&#1090;&#1100;</button>
+      <button class="secondary" id="btnDownloadBackup">&#1057;&#1082;&#1072;&#1095;&#1072;&#1090;&#1100; &#1092;&#1072;&#1081;&#1083;</button>
     </div>
     <div class="row" id="restoreRow">
-      <button class="danger" id="btnRestoreBackup">Загрузить этот текст как данные (заменить всё)</button>
+      <button class="danger" id="btnRestoreBackup">&#1047;&#1072;&#1075;&#1088;&#1091;&#1079;&#1080;&#1090;&#1100; &#1101;&#1090;&#1086;&#1090; &#1090;&#1077;&#1082;&#1089;&#1090; &#1082;&#1072;&#1082; &#1076;&#1072;&#1085;&#1085;&#1099;&#1077; (&#1079;&#1072;&#1084;&#1077;&#1085;&#1080;&#1090;&#1100; &#1074;&#1089;&#1105;)</button>
     </div>
     <div class="row">
-      <button class="secondary" id="btnCloseBackup">Закрыть</button>
+      <button class="secondary" id="btnCloseBackup">&#1047;&#1072;&#1082;&#1088;&#1099;&#1090;&#1100;</button>
     </div>
   </div>
 </div>
 
-<!-- jsPDF (для векторного экспорта в PDF) -->
+<!-- jsPDF (&#1076;&#1083;&#1103; &#1074;&#1077;&#1082;&#1090;&#1086;&#1088;&#1085;&#1086;&#1075;&#1086; &#1101;&#1082;&#1089;&#1087;&#1086;&#1088;&#1090;&#1072; &#1074; PDF) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
@@ -223,7 +223,7 @@
   var STORAGE_KEY = "khacharoyTreeData";
 
   var DEFAULT_DATA = [
-    { id: 'root1', name: 'Корень', family: '', fatherId: null }
+    { id: 'root1', name: '\u041a\u043e\u0440\u0435\u043d\u044c', family: '', fatherId: null }
   ];
 
   var NODE_W = 150, NODE_H = 64, NODE_GAP_X = 26, LEVEL_GAP_Y = 110;
@@ -381,10 +381,10 @@
   function truncate(c, text, maxWidth){
     if(c.measureText(text).width <= maxWidth) return text;
     var t = text;
-    while(t.length > 1 && c.measureText(t + '…').width > maxWidth){
+    while(t.length > 1 && c.measureText(t + '\u2026').width > maxWidth){
       t = t.slice(0, -1);
     }
-    return t + '…';
+    return t + '\u2026';
   }
 
   function resizeCanvas(){
@@ -472,7 +472,7 @@
     people.forEach(function(p){ if(p.family) families.add(p.family); });
     var sorted = Array.from(families).sort();
     var prev = familyFilter.value || 'all';
-    familyFilter.innerHTML = '<option value="all">Все семьи</option>';
+    familyFilter.innerHTML = '<option value="all">\u0412\u0441\u0435 \u0441\u0435\u043c\u044c\u0438</option>';
     sorted.forEach(function(f){
       var opt = document.createElement('option');
       opt.value = f; opt.textContent = f;
@@ -616,9 +616,9 @@
 
   btnEdit.addEventListener('click', function(){
     if(!currentAdminTarget) return;
-    var newName = prompt('Имя:', currentAdminTarget.name);
+    var newName = prompt('\u0418\u043c\u044f:', currentAdminTarget.name);
     if(newName === null) return;
-    var newFamily = prompt('Фамилия (можно оставить пустым):', currentAdminTarget.family || '');
+    var newFamily = prompt('\u0424\u0430\u043c\u0438\u043b\u0438\u044f (\u043c\u043e\u0436\u043d\u043e \u043e\u0441\u0442\u0430\u0432\u0438\u0442\u044c \u043f\u0443\u0441\u0442\u044b\u043c):', currentAdminTarget.family || '');
     if(newFamily === null) return;
     currentAdminTarget.name = newName.trim();
     currentAdminTarget.family = newFamily.trim();
@@ -629,7 +629,7 @@
 
   btnAddSon.addEventListener('click', function(){
     if(!currentAdminTarget) return;
-    var newName = prompt('Имя нового сына:');
+    var newName = prompt('\u0418\u043c\u044f \u043d\u043e\u0432\u043e\u0433\u043e \u0441\u044b\u043d\u0430:');
     if(!newName || !newName.trim()) return;
     var newId = 'p' + Date.now() + Math.floor(Math.random()*1000);
     people.push({ id: newId, name: newName.trim(), family: '', fatherId: currentAdminTarget.id });
@@ -643,8 +643,8 @@
     var target = currentAdminTarget;
     var descendants = collectDescendants(target.id);
     var msg = descendants.length
-      ? 'У "' + target.name + '" есть потомки (' + descendants.length + ' чел.). Удалить его вместе со всеми потомками?'
-      : 'Удалить "' + target.name + '"?';
+      ? '\u0423 "' + target.name + '" \u0435\u0441\u0442\u044c \u043f\u043e\u0442\u043e\u043c\u043a\u0438 (' + descendants.length + ' \u0447\u0435\u043b.). \u0423\u0434\u0430\u043b\u0438\u0442\u044c \u0435\u0433\u043e \u0432\u043c\u0435\u0441\u0442\u0435 \u0441\u043e \u0432\u0441\u0435\u043c\u0438 \u043f\u043e\u0442\u043e\u043c\u043a\u0430\u043c\u0438?'
+      : '\u0423\u0434\u0430\u043b\u0438\u0442\u044c "' + target.name + '"?';
     if(!confirm(msg)) return;
     var idsToRemove = {};
     idsToRemove[target.id] = true;
@@ -685,7 +685,7 @@
   function hideLogin(){ loginOverlay.classList.remove('show'); }
 
   function updateAdminButton(){
-    adminBtn.textContent = isAdmin ? 'Админ: вкл' : 'Админ';
+    adminBtn.textContent = isAdmin ? '\u0410\u0434\u043c\u0438\u043d: \u0432\u043a\u043b' : '\u0410\u0434\u043c\u0438\u043d';
     adminBtn.classList.toggle('active', isAdmin);
   }
 
@@ -695,7 +695,7 @@
       updateAdminButton();
       hideLogin();
     } else {
-      loginError.textContent = 'Неверный пароль';
+      loginError.textContent = '\u041d\u0435\u0432\u0435\u0440\u043d\u044b\u0439 \u043f\u0430\u0440\u043e\u043b\u044c';
     }
   });
   passwordInput.addEventListener('keydown', function(e){
@@ -858,7 +858,7 @@
   function fetchFontAsBase64(url){
     return fetch(url)
       .then(function(res){
-        if(!res.ok) throw new Error('Не удалось загрузить шрифт: ' + url);
+        if(!res.ok) throw new Error('\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u0437\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044c \u0448\u0440\u0438\u0444\u0442: ' + url);
         return res.arrayBuffer();
       })
       .then(function(buf){
@@ -875,8 +875,8 @@
   var cyrillicFontReady = false;
 
   function embedCyrillicFont(pdf){
-    var regularUrl = 'https://cdn.jsdelivr.net/gh/google/fonts@main/apache/roboto/static/Roboto-Regular.ttf';
-    var boldUrl = 'https://cdn.jsdelivr.net/gh/google/fonts@main/apache/roboto/static/Roboto-Bold.ttf';
+    var regularUrl = 'https://fonts.gstatic.com/s/roboto/v20/KFOmCnqEu92Fr1Mu4mxP.ttf';
+    var boldUrl = 'https://fonts.gstatic.com/s/roboto/v20/KFOlCnqEu92Fr1MmWUlfBBc9.ttf';
     return Promise.all([fetchFontAsBase64(regularUrl), fetchFontAsBase64(boldUrl)])
       .then(function(results){
         pdf.addFileToVFS('Roboto-Regular.ttf', results[0]);
@@ -886,7 +886,7 @@
         cyrillicFontReady = true;
       })
       .catch(function(err){
-        console.error('Не удалось загрузить кириллический шрифт, будет использован стандартный (без кириллицы):', err);
+        console.error('\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u0437\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044c \u043a\u0438\u0440\u0438\u043b\u043b\u0438\u0447\u0435\u0441\u043a\u0438\u0439 \u0448\u0440\u0438\u0444\u0442, \u0431\u0443\u0434\u0435\u0442 \u0438\u0441\u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u043d \u0441\u0442\u0430\u043d\u0434\u0430\u0440\u0442\u043d\u044b\u0439 (\u0431\u0435\u0437 \u043a\u0438\u0440\u0438\u043b\u043b\u0438\u0446\u044b):', err);
         cyrillicFontReady = false;
       });
   }
@@ -894,11 +894,11 @@
   function exportTreeToPDF(){
     var ids = Object.keys(positions);
     if(!ids.length) return;
-    if(!window.jspdf){ alert('Библиотека PDF ещё не загрузилась, попробуйте ещё раз.'); return; }
+    if(!window.jspdf){ alert('\u0411\u0438\u0431\u043b\u0438\u043e\u0442\u0435\u043a\u0430 PDF \u0435\u0449\u0451 \u043d\u0435 \u0437\u0430\u0433\u0440\u0443\u0437\u0438\u043b\u0430\u0441\u044c, \u043f\u043e\u043f\u0440\u043e\u0431\u0443\u0439\u0442\u0435 \u0435\u0449\u0451 \u0440\u0430\u0437.'); return; }
 
     exportPdfBtn.disabled = true;
     var originalLabel = exportPdfBtn.textContent;
-    exportPdfBtn.textContent = 'Готовим PDF...';
+    exportPdfBtn.textContent = '\u0413\u043e\u0442\u043e\u0432\u0438\u043c PDF...';
 
     var minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
     ids.forEach(function(id){
@@ -911,7 +911,7 @@
 
     var margin = 40;
     var PT_PER_UNIT = 0.7;
-    var MAX_DIM = 14000; // безопасный предел размера страницы PDF
+    var MAX_DIM = 14000; // \u0431\u0435\u0437\u043e\u043f\u0430\u0441\u043d\u044b\u0439 \u043f\u0440\u0435\u0434\u0435\u043b \u0440\u0430\u0437\u043c\u0435\u0440\u0430 \u0441\u0442\u0440\u0430\u043d\u0438\u0446\u044b PDF
 
     var contentW = (maxX - minX) * PT_PER_UNIT;
     var contentH = (maxY - minY) * PT_PER_UNIT;
@@ -946,7 +946,7 @@
     function tx(x){ return (x - minX) * PT_PER_UNIT + margin; }
     function ty(y){ return (y - minY) * PT_PER_UNIT + margin; }
 
-    // рёбра (связи родитель-потомок)
+    // \u0440\u0451\u0431\u0440\u0430 (\u0441\u0432\u044f\u0437\u0438 \u0440\u043e\u0434\u0438\u0442\u0435\u043b\u044c-\u043f\u043e\u0442\u043e\u043c\u043e\u043a)
     pdf.setDrawColor(180, 190, 200);
     pdf.setLineWidth(1);
     people.forEach(function(p){
@@ -1024,7 +1024,7 @@
       }
     } catch(e){ copied = false; }
     backupError.style.color = copied ? '#059669' : '#dc2626';
-    backupError.textContent = copied ? 'Скопировано.' : 'Не удалось скопировать автоматически — текст уже выделен, скопируйте вручную (зажать → Копировать).';
+    backupError.textContent = copied ? '\u0421\u043a\u043e\u043f\u0438\u0440\u043e\u0432\u0430\u043d\u043e.' : '\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u0441\u043a\u043e\u043f\u0438\u0440\u043e\u0432\u0430\u0442\u044c \u0430\u0432\u0442\u043e\u043c\u0430\u0442\u0438\u0447\u0435\u0441\u043a\u0438 \u2014 \u0442\u0435\u043a\u0441\u0442 \u0443\u0436\u0435 \u0432\u044b\u0434\u0435\u043b\u0435\u043d, \u0441\u043a\u043e\u043f\u0438\u0440\u0443\u0439\u0442\u0435 \u0432\u0440\u0443\u0447\u043d\u0443\u044e (\u0437\u0430\u0436\u0430\u0442\u044c \u2192 \u041a\u043e\u043f\u0438\u0440\u043e\u0432\u0430\u0442\u044c).';
   });
 
   btnDownloadBackup.addEventListener('click', function(){
@@ -1041,7 +1041,7 @@
       setTimeout(function(){ URL.revokeObjectURL(url); }, 2000);
     } catch(e){
       backupError.style.color = '#dc2626';
-      backupError.textContent = 'Не удалось скачать файл: ' + e.message;
+      backupError.textContent = '\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u0441\u043a\u0430\u0447\u0430\u0442\u044c \u0444\u0430\u0439\u043b: ' + e.message;
     }
   });
 
@@ -1052,15 +1052,15 @@
       parsed = JSON.parse(text);
     } catch(e){
       backupError.style.color = '#dc2626';
-      backupError.textContent = 'Это не корректный JSON, ничего не изменено.';
+      backupError.textContent = '\u042d\u0442\u043e \u043d\u0435 \u043a\u043e\u0440\u0440\u0435\u043a\u0442\u043d\u044b\u0439 JSON, \u043d\u0438\u0447\u0435\u0433\u043e \u043d\u0435 \u0438\u0437\u043c\u0435\u043d\u0435\u043d\u043e.';
       return;
     }
     if(!Array.isArray(parsed) || !parsed.length){
       backupError.style.color = '#dc2626';
-      backupError.textContent = 'Данные должны быть непустым списком людей.';
+      backupError.textContent = '\u0414\u0430\u043d\u043d\u044b\u0435 \u0434\u043e\u043b\u0436\u043d\u044b \u0431\u044b\u0442\u044c \u043d\u0435\u043f\u0443\u0441\u0442\u044b\u043c \u0441\u043f\u0438\u0441\u043a\u043e\u043c \u043b\u044e\u0434\u0435\u0439.';
       return;
     }
-    if(!confirm('Заменить ВСЕ текущие данные на этот текст? Текущее дерево (' + people.length + ' чел.) будет заменено на ' + parsed.length + ' чел. из текста выше.')) return;
+    if(!confirm('\u0417\u0430\u043c\u0435\u043d\u0438\u0442\u044c \u0412\u0421\u0415 \u0442\u0435\u043a\u0443\u0449\u0438\u0435 \u0434\u0430\u043d\u043d\u044b\u0435 \u043d\u0430 \u044d\u0442\u043e\u0442 \u0442\u0435\u043a\u0441\u0442? \u0422\u0435\u043a\u0443\u0449\u0435\u0435 \u0434\u0435\u0440\u0435\u0432\u043e (' + people.length + ' \u0447\u0435\u043b.) \u0431\u0443\u0434\u0435\u0442 \u0437\u0430\u043c\u0435\u043d\u0435\u043d\u043e \u043d\u0430 ' + parsed.length + ' \u0447\u0435\u043b. \u0438\u0437 \u0442\u0435\u043a\u0441\u0442\u0430 \u0432\u044b\u0448\u0435.')) return;
     people = parsed;
     saveData();
     closeBackupModal();
